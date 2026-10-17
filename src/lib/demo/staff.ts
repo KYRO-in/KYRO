@@ -12,7 +12,7 @@ type StaffStore = {
   pins: Map<string, string>;
 };
 
-const KEY = "__kyro_demo_staff_v1__";
+const KEY = "__kayyro_demo_staff_v1__";
 
 function uid() {
   return typeof crypto !== "undefined" && "randomUUID" in crypto

@@ -3,7 +3,7 @@ import {
   type BusinessType,
 } from "@/lib/business-types";
 
-const STORAGE_PREFIX = "kyro-business-type:";
+const STORAGE_PREFIX = "kayyro-business-type:";
 
 /** Local fallback when organizations.business_type column is not migrated yet. */
 export function readLocalBusinessType(orgId: string | null | undefined): BusinessType | null {

@@ -1,4 +1,4 @@
-# KYRO — Smart billing for every business
+# Kayyro — Smart billing for every business
 
 VAT-compliant invoicing, inventory, and customer credit for businesses in the UAE.
 
@@ -23,7 +23,7 @@ Fill in Supabase keys in `.env.local`.
 ### 2. Supabase
 
 1. Create a project at [supabase.com](https://supabase.com).
-2. Run the SQL files in `supabase/migrations/` in order in the SQL Editor: `037_vat_gcc.sql`, `038_every_business_email.sql`, `039_security_hardening.sql`, then `041_kyro_features.sql`. (There is no 040: an early draft was withdrawn. If you ran it, it is harmless.)
+2. Run the SQL files in `supabase/migrations/` in order in the SQL Editor: `037_vat_gcc.sql`, `038_every_business_email.sql`, `039_security_hardening.sql`, then `041_kayyro_features.sql`. (There is no 040: an early draft was withdrawn. If you ran it, it is harmless.)
 3. **Authentication → Sign In / Providers → Email**: keep email/password on and turn **Confirm email** on. New owners get a confirmation link and their business is created when they come back.
 4. **Authentication → URL Configuration**: set the Site URL to your live address and add `https://<your-domain>/auth/callback` to the redirect URLs (used by sign-up confirmation and password reset).
 5. **Authentication → Emails → SMTP**: Supabase's built-in sender only allows a few emails an hour. Connect your own SMTP (for example Resend) before real customers sign up.
@@ -138,4 +138,4 @@ node scripts/generate-brand-icons.mjs
 
 ## Security
 
-See [SECURITY.md](SECURITY.md) for how KYRO is protected and what to configure before going live.
+See [SECURITY.md](SECURITY.md) for how Kayyro is protected and what to configure before going live.

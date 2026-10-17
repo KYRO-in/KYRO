@@ -1,5 +1,5 @@
 import { mfaRequired } from "@/lib/security/mfa";
-import Anthropic from "@anthropic-ai/sdk";
+import { AiProviderError, aiConfigured, chat, type ChatMessage } from "@/lib/ai/provider";
 import { NextResponse } from "next/server";
 import { AI_TOOLS, runAiTool } from "@/lib/ai/tools";
 import { isTimeZone, localDate } from "@/lib/attendance";
@@ -12,7 +12,7 @@ import { getCountryConfig } from "@/lib/vat/countries";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-const MODEL = process.env.ANTHROPIC_MODEL || "claude-opus-5-5";
+const TOOL_RESULT_CHARS = 12000;
 const MAX_TURNS = 6;
 const MAX_HISTORY = 20;
 const MAX_CHARS = 2000;
@@ -38,7 +38,7 @@ function parseHistory(body: unknown): ChatTurn[] | null {
 
 function systemPrompt(org: { name: string; country: string; currency: string }, today: string, timeZone: string) {
   const cfg = getCountryConfig(org.country);
-  return `You are Ask KYRO, the assistant inside KYRO, a billing, stock and staff app. You are talking to someone who runs or works at "${org.name}".
+  return `You are Ask Kayyro, the assistant inside Kayyro, a billing, stock and staff app. You are talking to someone who runs or works at "${org.name}".
 
 Business facts:
 - Country: ${cfg.name}. Currency: ${org.currency}. Sales tax is called ${cfg.taxSystem === "none" ? "nothing - this country has no VAT" : cfg.taxName}.
@@ -48,16 +48,16 @@ How to answer:
 - Use the tools to get real numbers. Never guess or invent figures, names or dates. If the tools return nothing, say so plainly.
 - Keep answers short and practical: lead with the answer, then at most a few bullet points. Show money with the currency code, e.g. ${org.currency} 1,250.00.
 - Write in plain words for a shop owner, not an accountant. Reply in the same language the person writes in.
-- You can only read data. If asked to create, change, send or delete something, say where in KYRO to do it (Invoices, POS, Products, Customers, Purchases, Staff, Attendance, Reports, Settings).
+- You can only read data. If asked to create, change, send or delete something, say where in Kayyro to do it (Invoices, POS, Products, Customers, Purchases, Staff, Attendance, Reports, Settings).
 - For tax filing or legal questions, give the numbers and suggest confirming with their accountant.
 - Do not use tables or headings; use short paragraphs and "- " bullets, with **bold** for key numbers.`;
 }
 
 export async function POST(request: Request) {
   try {
-    if (!process.env.ANTHROPIC_API_KEY) {
+    if (!aiConfigured()) {
       return NextResponse.json(
-        { error: "Ask KYRO is not switched on yet. Add ANTHROPIC_API_KEY to the server settings.", code: "not_configured" },
+        { error: "Ask Kayyro is not switched on yet. Add AI_API_KEY to the server settings.", code: "not_configured" },
         { status: 503 }
       );
     }
@@ -99,13 +99,13 @@ export async function POST(request: Request) {
       org.trial_ends_at &&
       new Date(org.trial_ends_at).getTime() < Date.now();
     if (trialOver || org.subscription_status === "cancelled" || org.subscription_status === "past_due") {
-      return NextResponse.json({ error: "Choose a plan in Settings → Billing to keep using Ask KYRO." }, { status: 402 });
+      return NextResponse.json({ error: "Choose a plan in Settings → Billing to keep using Ask Kayyro." }, { status: 402 });
     }
 
     const { data: allowance, error: allowErr } = await admin.rpc("ai_usage_take", { p_org: orgId });
     if (allowErr) {
       return NextResponse.json(
-        { error: "Ask KYRO needs one database update. Run supabase/migrations/043_pos_staff_ai.sql in Supabase." },
+        { error: "Ask Kayyro needs one database update. Run supabase/migrations/043_pos_staff_ai.sql in Supabase." },
         { status: 503 }
       );
     }
@@ -115,71 +115,53 @@ export async function POST(request: Request) {
     if (!take?.allowed) {
       return NextResponse.json(
         {
-          error: `You've used all ${take?.max_questions ?? ""} Ask KYRO questions for this month. Upgrade in Settings → Billing for more.`,
+          error: `You've used all ${take?.max_questions ?? ""} Ask Kayyro questions for this month. Upgrade in Settings → Billing for more.`,
           code: "limit",
         },
         { status: 429 }
       );
     }
 
-    const client = new Anthropic();
     const today = localDate(new Date(), timeZone);
     const system = systemPrompt(
       { name: org.brand_name || org.name, country: org.country || "AE", currency: org.currency || "AED" },
       today,
       timeZone
     );
-    const messages: Anthropic.Beta.BetaMessageParam[] = history.map((t) => ({ role: t.role, content: t.content }));
+    const messages: ChatMessage[] = [
+      { role: "system", content: system },
+      ...history.map((t): ChatMessage => ({ role: t.role, content: t.content })),
+    ];
     let inputTokens = 0;
     let outputTokens = 0;
     let answer = "";
 
     for (let turn = 0; turn < MAX_TURNS; turn++) {
-      const response = await client.beta.messages.create({
-        model: MODEL,
-        max_tokens: 16000,
-        betas: ["server-side-fallback-2026-07-01"],
-        fallbacks: "default",
-        output_config: { effort: "low" },
-        system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
-        tools: AI_TOOLS,
-        messages,
-      });
-      inputTokens += response.usage.input_tokens + (response.usage.cache_read_input_tokens ?? 0);
-      outputTokens += response.usage.output_tokens;
+      const response = await chat(messages, AI_TOOLS);
+      inputTokens += response.inputTokens;
+      outputTokens += response.outputTokens;
 
-      if (response.stop_reason === "refusal") {
-        answer = "Sorry, I can't help with that one. Try asking about your sales, stock, customers or staff.";
-        break;
-      }
-      if (response.stop_reason === "pause_turn") {
-        messages.push({ role: "assistant", content: response.content });
-        continue;
-      }
-
-      const toolUses = response.content.filter((b): b is Anthropic.Beta.BetaToolUseBlock => b.type === "tool_use");
-      if (response.stop_reason !== "tool_use" || !toolUses.length) {
-        answer = response.content
-          .filter((b): b is Anthropic.Beta.BetaTextBlock => b.type === "text")
-          .map((b) => b.text)
-          .join("\n")
-          .trim();
+      if (!response.toolCalls.length) {
+        answer = response.text;
         break;
       }
 
-      messages.push({ role: "assistant", content: response.content });
+      messages.push(response.assistant);
       const results = await Promise.all(
-        toolUses.map(async (t) => {
-          const r = await runAiTool(supabase, t.name, t.input, { timeZone });
-          return {
-            type: "tool_result" as const,
-            tool_use_id: t.id,
-            content: r.content,
-            is_error: r.isError || undefined,
-          };
+        response.toolCalls.map(async (call) => {
+          let input: unknown = {};
+          try {
+            input = call.function.arguments ? JSON.parse(call.function.arguments) : {};
+          } catch {
+            input = {};
+          }
+          const r = await runAiTool(supabase, call.function.name, input, { timeZone });
+          // Free AI plans have small per-minute limits, so keep tool answers compact
+          const content = r.content.length > TOOL_RESULT_CHARS ? `${r.content.slice(0, TOOL_RESULT_CHARS)}…(cut short)` : r.content;
+          return { role: "tool" as const, tool_call_id: call.id, content };
         })
       );
-      messages.push({ role: "user", content: results });
+      messages.push(...results);
     }
 
     await admin.rpc("ai_usage_tokens", { p_org: orgId, p_input: inputTokens, p_output: outputTokens });
@@ -190,14 +172,14 @@ export async function POST(request: Request) {
       max: take.max_questions,
     });
   } catch (e) {
-    if (e instanceof Anthropic.RateLimitError) {
-      return NextResponse.json({ error: "Ask KYRO is busy right now. Try again in a minute." }, { status: 429 });
-    }
-    if (e instanceof Anthropic.AuthenticationError) {
-      return serverError("ai", e, "Ask KYRO's API key is not valid. Check ANTHROPIC_API_KEY.");
-    }
-    if (e instanceof Anthropic.APIError) {
-      return serverError("ai", e, "Ask KYRO could not answer just now. Please try again.");
+    if (e instanceof AiProviderError) {
+      if (e.status === 429) {
+        return NextResponse.json({ error: "Ask Kayyro is busy right now. Try again in a minute." }, { status: 429 });
+      }
+      if (e.status === 401 || e.status === 403) {
+        return serverError("ai", e, "Ask Kayyro's AI key is not valid. Check AI_API_KEY.");
+      }
+      return serverError("ai", e, "Ask Kayyro could not answer just now. Please try again.");
     }
     return serverError("ai", e);
   }

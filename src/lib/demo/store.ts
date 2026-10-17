@@ -549,8 +549,8 @@ function seed(): Store {
 
   const organization: Organization = {
     id: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
-    name: "KYRO Demo Trading LLC",
-    slug: "kyro-demo",
+    name: "Kayyro Demo Trading LLC",
+    slug: "kayyro-demo",
     tax_id: "100123456700003",
     country: "AE",
     currency: "AED",
@@ -563,11 +563,11 @@ function seed(): Store {
     subscription_status: "active",
     trial_ends_at: "2027-07-31T00:00:00.000Z",
     created_at: "2026-01-01T10:00:00.000Z",
-    brand_name: "KYRO Demo",
+    brand_name: "Kayyro Demo",
     city: "Dubai",
     pincode: "123456",
     phone: "+971 4 123 4567",
-    email: "billing@kyro.local",
+    email: "billing@kayyro.local",
     bank_name: "Emirates NBD",
     bank_account: "AE070331234567890123456",
     bank_ifsc: "EBILAEAD",
@@ -753,8 +753,8 @@ function demoCategories(): ProductCategoryRow[] {
   return rows;
 }
 
-const globalKey = "__kyro_demo_store_v12__";
-const seededKey = "__kyro_demo_seeded_v12__";
+const globalKey = "__kayyro_demo_store_v12__";
+const seededKey = "__kayyro_demo_seeded_v12__";
 
 function getStore(): Store {
   const g = globalThis as unknown as Record<string, Store | undefined>;
@@ -788,7 +788,7 @@ function getStore(): Store {
     s.organization = {
       id: s.company.id,
       name: s.company.company_name,
-      slug: "kyro-demo",
+      slug: "kayyro-demo",
       tax_id: s.company.tax_id || null,
       country: s.company.country,
       currency: s.company.currency,

@@ -55,8 +55,8 @@ export function SavingsCalculator() {
   const [hourly, setHourly] = useState(60);
 
   const manualHours = (invoices * minutes) / 60;
-  const kyroHours = (invoices * 1) / 60; // about a minute per invoice once your catalog is in
-  const savedHours = Math.max(0, manualHours - kyroHours);
+  const kayyroHours = (invoices * 1) / 60; // about a minute per invoice once your catalog is in
+  const savedHours = Math.max(0, manualHours - kayyroHours);
   const savedValue = savedHours * hourly;
   const plan = invoices > 300 ? PAID_PLANS.business : invoices > 50 ? PAID_PLANS.pro : PAID_PLANS.starter;
   const multiple = plan.priceMonthly > 0 ? savedValue / plan.priceMonthly : 0;
@@ -85,7 +85,7 @@ export function SavingsCalculator() {
               <Slider label="Minutes per invoice today (typing, VAT, sending)" value={minutes} min={2} max={20} step={1} suffix="min" onChange={setMinutes} />
               <Slider label="What an hour of your time is worth" value={hourly} min={20} max={300} step={5} suffix="AED" onChange={setHourly} />
               <p className="text-xs text-white/40">
-                Estimate only. Assumes about one minute per invoice in KYRO once your products are added.
+                Estimate only. Assumes about one minute per invoice in Kayyro once your products are added.
               </p>
             </div>
 

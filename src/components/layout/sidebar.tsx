@@ -56,7 +56,7 @@ const billingNav: {
 }[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, tourId: "tour-dashboard" },
   { href: "/pos", label: "POS", icon: Store, hideForHotel: true, tourId: "tour-pos" },
-  { href: "/assistant", label: "Ask KYRO", icon: Sparkles, tourId: "tour-assistant" },
+  { href: "/assistant", label: "Ask Kayyro", icon: Sparkles, tourId: "tour-assistant" },
   {
     href: "/products",
     label: "Products",

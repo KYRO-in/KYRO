@@ -1,5 +1,5 @@
 -- ============================================================
--- KYRO: two-step verification (2FA) enforced in the database
+-- Kayyro: two-step verification (2FA) enforced in the database
 --
 -- Someone who turned on 2FA must have entered their authenticator code in
 -- this session (Supabase marks the session "aal2") before any business data
@@ -63,12 +63,12 @@ begin
   end loop;
 end $$;
 
-create or replace function public.kyro_schema_version()
+create or replace function public.kayyro_schema_version()
 returns integer
 language sql
 immutable
 as $$ select 44 $$;
-revoke execute on function public.kyro_schema_version() from public, anon;
-grant execute on function public.kyro_schema_version() to authenticated, service_role;
+revoke execute on function public.kayyro_schema_version() from public, anon;
+grant execute on function public.kayyro_schema_version() to authenticated, service_role;
 
 select pg_notify('pgrst', 'reload schema');

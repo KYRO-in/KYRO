@@ -17,7 +17,7 @@ const razorpay = "https://*.razorpay.com";
 
 /**
  * Content Security Policy: the browser only loads scripts, frames and data
- * from the places KYRO actually uses, which blunts XSS and data exfiltration.
+ * from the places Kayyro actually uses, which blunts XSS and data exfiltration.
  */
 const csp = [
   "default-src 'self'",

@@ -12,7 +12,7 @@ import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
 
 type Turn = { role: "user" | "assistant"; content: string; error?: boolean };
 
-const STORAGE_KEY = "kyro-ask-history";
+const STORAGE_KEY = "kayyro-ask-history";
 
 const SUGGESTIONS = [
   "How much did I sell this week?",
@@ -104,7 +104,7 @@ export default function AssistantPage() {
         {
           role: "assistant",
           content:
-            "Ask KYRO reads your live business data, so it works once you sign in to your own account. In this demo, try the POS, Staff and Attendance screens instead.",
+            "Ask Kayyro reads your live business data, so it works once you sign in to your own account. In this demo, try the POS, Staff and Attendance screens instead.",
         },
       ]);
       return;
@@ -127,7 +127,7 @@ export default function AssistantPage() {
         if (typeof json.used === "number") setUsage({ used: json.used, max: json.max ?? null });
       }
     } catch {
-      setTurns([...next, { role: "assistant", content: "Couldn't reach KYRO. Check your connection and try again.", error: true }]);
+      setTurns([...next, { role: "assistant", content: "Couldn't reach Kayyro. Check your connection and try again.", error: true }]);
     } finally {
       setBusy(false);
       inputRef.current?.focus();
@@ -140,7 +140,7 @@ export default function AssistantPage() {
     <div className="flex min-h-[calc(100dvh-9rem)] flex-col">
       <PageHeader
         eyebrow="AI"
-        title="Ask KYRO"
+        title="Ask Kayyro"
         description="Ask about your sales, stock, customers, spending or staff - in plain words, in any language."
         accent="violet"
         actions={
@@ -162,7 +162,7 @@ export default function AssistantPage() {
               </span>
               <h2 className="mt-4 font-display text-xl font-semibold text-ink">What would you like to know?</h2>
               <p className="mt-1 text-sm text-slate">
-                KYRO looks at your own invoices, payments, stock and attendance to answer. It can read, never change.
+                Kayyro looks at your own invoices, payments, stock and attendance to answer. It can read, never change.
               </p>
               <div className="mt-6 grid w-full gap-2 sm:grid-cols-2">
                 {SUGGESTIONS.map((s) => (

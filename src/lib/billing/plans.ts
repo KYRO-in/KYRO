@@ -9,7 +9,7 @@ export type PlanLimits = {
   maxActiveProducts: number | null;
   /** Active employees in Staff & Attendance (null = unlimited) */
   maxEmployees: number | null;
-  /** Questions to Ask KYRO per calendar month */
+  /** Questions to Ask Kayyro per calendar month */
   maxAiQuestions: number;
 };
 
@@ -26,7 +26,7 @@ export type PlanCapabilities = {
   pos: boolean;
   /** Staff check-in / check-out with photos */
   attendance: boolean;
-  /** Ask KYRO, the AI assistant */
+  /** Ask Kayyro, the AI assistant */
   aiAssistant: boolean;
 };
 
@@ -60,7 +60,7 @@ export const REGION_PRICES: Record<PriceRegion, Record<PaidPlanId, { monthly: nu
 };
 
 /**
- * Ask KYRO questions per month. India's allowance is lower because each answer
+ * Ask Kayyro questions per month. India's allowance is lower because each answer
  * costs the same in dollars while the rupee price is lower. Mirrors
  * plan_limit('ai_questions' / 'ai_questions_in') in migration 043.
  */
@@ -277,9 +277,9 @@ export function getPlanChecklist(planId: PaidPlanId, region: PriceRegion = "glob
     },
     {
       id: "ai",
-      label: `Ask KYRO AI: ${AI_QUESTIONS[region][planId].toLocaleString("en-US")} questions / month`,
+      label: `Ask Kayyro AI: ${AI_QUESTIONS[region][planId].toLocaleString("en-US")} questions / month`,
       included: capabilities.aiAssistant,
-      rowLabel: "Ask KYRO AI questions / month",
+      rowLabel: "Ask Kayyro AI questions / month",
       value: AI_QUESTIONS[region][planId].toLocaleString("en-US"),
     },
     {

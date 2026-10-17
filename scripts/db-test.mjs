@@ -278,13 +278,13 @@ check(!r.ok, "only local sale, reverse charge and export are accepted");
 r = await asUser(ids.staffA, `select public.record_payment($1::jsonb) as p`, [JSON.stringify({ customer_id: custA.id, invoice_id: bhdId, amount: 1.357 })]);
 const paid = bhdId ? await one(`select status, amount_paid from public.invoices where id=$1`, [bhdId]) : null;
 check(r.ok && paid?.status === "paid" && Number(paid.amount_paid) === 1.357, `paying 1.357 BHD marks the invoice paid (${paid ? `${paid.status} ${paid.amount_paid}` : r.msg})`);
-r = await asUser(ids.staffA, `select public.kyro_schema_version() as v`);
+r = await asUser(ids.staffA, `select public.kayyro_schema_version() as v`);
 check(r.ok && r.rows[0].v >= 42, "the app can tell migration 042 ran");
 r = await asUser(ids.adminB, `select id from public.invoices where id=$1`, [bhdId]);
 check(r.ok && r.rows.length === 0, "another business still cannot see the invoice");
 await db.query(`update public.organizations set country='AE', currency='AED' where id=$1`, [orgA.id]);
 
-// ---------- staff attendance and Ask KYRO (043) ----------
+// ---------- staff attendance and Ask Kayyro (043) ----------
 r = await asUser(ids.staffA, `insert into public.employees (organization_id, full_name) values ($1, 'Ravi') returning id`, [orgA.id]);
 check(!r.ok, "staff cannot add employees");
 r = await asUser(ids.acctA, `insert into public.employees (organization_id, full_name) values ($1, 'Ravi') returning id`, [orgA.id]);
@@ -320,10 +320,10 @@ for (let i = 0; i < 4; i++) await asUser(ids.adminA, `insert into public.employe
 r = await asUser(ids.adminA, `insert into public.employees (organization_id, full_name) values ($1, 'Sixth') returning id`, [orgA.id]);
 check(!r.ok && /employees/.test(r.msg), `the trial stops at 5 active employees (${r.msg ?? "allowed"})`);
 const ai1 = await one(`select * from public.ai_usage_take($1)`, [orgA.id]);
-check(ai1.allowed && ai1.used === 1 && ai1.max_questions === 30, `Ask KYRO counts questions against the plan (${ai1.used}/${ai1.max_questions})`);
+check(ai1.allowed && ai1.used === 1 && ai1.max_questions === 30, `Ask Kayyro counts questions against the plan (${ai1.used}/${ai1.max_questions})`);
 await db.query(`update public.ai_usage set questions = 30 where organization_id=$1`, [orgA.id]);
 const ai2 = await one(`select * from public.ai_usage_take($1)`, [orgA.id]);
-check(!ai2.allowed, "Ask KYRO stops at the monthly allowance");
+check(!ai2.allowed, "Ask Kayyro stops at the monthly allowance");
 await db.query(`update public.organizations set country='IN', currency='INR' where id=$1`, [orgA.id]);
 await db.query(`update public.ai_usage set questions = 19 where organization_id=$1`, [orgA.id]);
 const ai3 = await one(`select * from public.ai_usage_take($1)`, [orgA.id]);
@@ -367,11 +367,24 @@ await db.query(`delete from auth.mfa_factors where user_id = $1`, [ids.staffA]);
   const def = (await one(`select pg_get_functiondef('public.create_invoice_atomic(jsonb)'::regprocedure) as d`)).d;
   // Simulate a database created before the rename, then run 045 on it
   await db.exec(def.replace("'KY')", "'NF')"));
-  await db.exec(fs.readFileSync(path.join(DIR, "045_kyro_prefix_cleanup.sql"), "utf8"));
+  await db.exec(fs.readFileSync(path.join(DIR, "045_kayyro_prefix_cleanup.sql"), "utf8"));
   const after = (await one(`select pg_get_functiondef('public.create_invoice_atomic(jsonb)'::regprocedure) as d`)).d;
   check(!after.includes("'NF'") && after.includes("'KY'"), "045 switches the invoice prefix fallback to KY");
   r = await asUser(ids.staffA, `select public.create_invoice_atomic($1::jsonb) as r`, [invoicePayload(1, "2026-03-04")]);
   check(r.ok, `invoices still save after 045 (${r.msg ?? "ok"})`);
+}
+
+// ---------- the rename (046) ----------
+{
+  await db.query(`create or replace function public.kyro_schema_version() returns integer language sql as 'select 1'`);
+  await db.query(`update public.organizations set brand_name='KYRO' where id=$1`, [orgA.id]);
+  await db.exec(fs.readFileSync(path.join(DIR, "046_kayyro_rename.sql"), "utf8"));
+  const gone = await one(`select count(*)::int as n from pg_proc where proname='kyro_schema_version'`);
+  check(gone.n === 0, "046 removes the old schema-version function");
+  const v = await one(`select public.kayyro_schema_version() as v`);
+  check(v.v >= 46, "046 sets the new schema version");
+  const b = await one(`select brand_name from public.organizations where id=$1`, [orgA.id]);
+  check(b.brand_name === "Kayyro", "046 moves the old brand name to Kayyro");
 }
 
 // ---------- re-running the latest migrations is safe ----------

@@ -1,5 +1,5 @@
 -- ============================================================
--- KYRO: staff attendance with photos, and the AI assistant's monthly allowance
+-- Kayyro: staff attendance with photos, and the AI assistant's monthly allowance
 --
 -- 1) employees: the people who work in the shop. They do not need an app login.
 --    Each has a 4-digit PIN (hashed by the server, kept in employee_secrets
@@ -12,7 +12,7 @@
 -- 3) attendance storage bucket (private): {organization_id}/punches/... and
 --    {organization_id}/profiles/{employee_id}.jpg
 -- 4) Plan limits gain employees: trial and Starter 5, Pro 15, Business unlimited.
--- 5) ai_usage: questions asked to Ask KYRO per month, for the plan allowance
+-- 5) ai_usage: questions asked to Ask Kayyro per month, for the plan allowance
 --    (trial/Starter/Pro/Business: 30/100/400/1500; in India 20/50/200/600).
 --
 -- Run after 042. Additive, data-safe and safe to re-run.
@@ -384,7 +384,7 @@ create trigger employees_plan_limits
   before insert or update of active on public.employees
   for each row execute function public.enforce_plan_limits();
 
--- ---------- 5) Ask KYRO allowance ----------
+-- ---------- 5) Ask Kayyro allowance ----------
 create table if not exists public.ai_usage (
   organization_id uuid not null references public.organizations(id) on delete cascade,
   month date not null,
@@ -455,12 +455,12 @@ revoke execute on function public.ai_usage_tokens(uuid, bigint, bigint) from pub
 grant execute on function public.ai_usage_tokens(uuid, bigint, bigint) to service_role;
 
 -- ---------- Schema version ----------
-create or replace function public.kyro_schema_version()
+create or replace function public.kayyro_schema_version()
 returns integer
 language sql
 immutable
 as $$ select 43 $$;
-revoke execute on function public.kyro_schema_version() from public, anon;
-grant execute on function public.kyro_schema_version() to authenticated, service_role;
+revoke execute on function public.kayyro_schema_version() from public, anon;
+grant execute on function public.kayyro_schema_version() to authenticated, service_role;
 
 select pg_notify('pgrst', 'reload schema');

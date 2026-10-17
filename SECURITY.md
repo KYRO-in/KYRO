@@ -1,20 +1,20 @@
-# KYRO security
+# Kayyro security
 
-How KYRO protects business data, and what to configure before going live.
+How Kayyro protects business data, and what to configure before going live.
 
 ## How it is protected
 
-| Area | What KYRO does |
+| Area | What Kayyro does |
 |------|----------------|
 | Secrets | Server keys (`SUPABASE_SERVICE_ROLE_KEY`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`, `RESEND_API_KEY`, `METALS_API_KEY`) are read only in server code and never sent to the browser. `.env*.local` is git-ignored. The full git history was scanned: no keys have ever been committed. |
-| Authentication | Supabase Auth. Passwords are hashed by Supabase (bcrypt) and never stored or logged by KYRO. Sign-up enforces strong passwords (8+ characters with upper and lower case, a number and a symbol) and confirms the email address. Password reset by email link; the reset page never reveals whether an account exists. |
+| Authentication | Supabase Auth. Passwords are hashed by Supabase (bcrypt) and never stored or logged by Kayyro. Sign-up enforces strong passwords (8+ characters with upper and lower case, a number and a symbol) and confirms the email address. Password reset by email link; the reset page never reveals whether an account exists. |
 | Tenant isolation | Row Level Security on every table: a business can only read and write its own rows (`current_org_id()`). |
 | Access control | Admin-only pages (`/settings`, `/users`, `/warehouses`) are checked on the server in middleware as well as in the UI. In the database, staff cannot change roles, promote themselves, move users between businesses, or edit business settings. The accountant role is read-only, enforced by a database trigger on every business table (including inside invoice functions). |
 | Billing | Plan, trial and subscription fields can only be changed by the server (Razorpay webhook with a verified HMAC signature), never from the browser. Plan limits (invoices per month, active products, expired trial) are enforced in the database. |
 | API endpoints | Every private endpoint checks the session and the user's business. Errors return a generic message; details are only logged on the server. |
 | Rate limiting | Shared, database-backed limits (migration 039) on sign-up, staff invites, invoice emails, WhatsApp shares, short links and checkout, plus per-IP flood protection in middleware. |
 | CSRF / CORS | State-changing API calls from other websites are rejected (Origin / Sec-Fetch-Site check). No CORS headers are sent, so other sites cannot read API responses. |
-| XSS | React escapes all output; email HTML is escaped; a Content Security Policy only allows scripts from KYRO and Razorpay. |
+| XSS | React escapes all output; email HTML is escaped; a Content Security Policy only allows scripts from Kayyro and Razorpay. |
 | Security headers | CSP, HSTS, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `Permissions-Policy`, no `X-Powered-By`. API responses are `no-store`. |
 | Input handling | All forms are validated with zod. Uploaded PDFs must be real PDFs (and at most 6 MB). Exports guard against spreadsheet formula injection. Redirects after login only go to pages on this site. |
 | Files | Invoice PDFs are in a private bucket, opened through short-lived signed links. Signature images can no longer be listed by outsiders. Browser source maps are not published. |
@@ -26,7 +26,7 @@ How KYRO protects business data, and what to configure before going live.
 ### Supabase (SQL Editor)
 
 1. Back up the database (Database → Backups).
-2. Run `037_vat_gcc.sql`, then `038_every_business_email.sql`, then `039_security_hardening.sql`, then `041_kyro_features.sql`. Each is safe to re-run.
+2. Run `037_vat_gcc.sql`, then `038_every_business_email.sql`, then `039_security_hardening.sql`, then `041_kayyro_features.sql`. Each is safe to re-run.
 
 ### Supabase (Dashboard)
 

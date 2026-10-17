@@ -1,7 +1,7 @@
 "use client";
 
 import { SignatureUploadSection } from "@/components/settings/signature-upload-section";
-import { BusinessTypePicker } from "@/components/settings/business-type-picker";
+import { BusinessTypeSection } from "@/components/settings/business-type-section";
 import { EmailSettingsSection } from "@/components/settings/email-settings-section";
 import { InvoiceOptionsSection } from "@/components/settings/invoice-options-section";
 import { DataSection } from "@/components/settings/data-section";
@@ -13,7 +13,6 @@ import { Select } from "@/components/ui/select";
 import { EmptyState, LoadingBlock, PageHeader } from "@/components/ui/page-header";
 import { useToast } from "@/components/ui/toast";
 import { useCompanySettings, useUpdateCompanySettings } from "@/hooks/use-company";
-import { BUSINESS_TYPE_OPTIONS, type BusinessType } from "@/lib/business-types";
 import { DEFAULT_INVOICE_PREFIX } from "@/lib/brand";
 import { DEFAULT_COUNTRY, countryOptions, getCountryConfig } from "@/lib/vat/countries";
 import { ensureTaxSchema } from "@/lib/vat/schema";
@@ -42,12 +41,9 @@ export default function SettingsPage() {
     resolver: zodFormResolver(companySettingsSchema),
   });
 
-  const watchedType = watch("business_type");
   const country = getCountryConfig(watch("country"));
   const taxName = country.taxName;
   const countryChanged = !!data && !!watch("country") && watch("country") !== data.country;
-  const typeHint =
-    BUSINESS_TYPE_OPTIONS.find((o) => o.value === watchedType)?.description ?? "";
 
   useEffect(() => {
     if (!data) return;
@@ -107,7 +103,10 @@ export default function SettingsPage() {
         const { createClient } = await import("@/lib/supabase/client");
         await ensureTaxSchema(createClient());
       }
-      await update.mutateAsync({ id: data.id, ...values });
+      // Business type has its own card above and saves on its own
+      const { business_type: _type, ...rest } = values;
+      void _type;
+      await update.mutateAsync({ id: data.id, ...rest });
       toast("Settings saved");
       reset(values);
     } catch (e) {
@@ -122,8 +121,10 @@ export default function SettingsPage() {
       <PageHeader
         eyebrow="Settings"
         title="Organization settings"
-        description="Country, tax registration, letterhead and bank details - stored on your organization"
+        description="Business type, country, tax registration, letterhead and bank details - stored on your organization"
       />
+
+      <BusinessTypeSection organizationId={data.id} current={data.business_type} />
 
       <form
         onSubmit={handleSubmit(onSubmit, () =>
@@ -131,21 +132,6 @@ export default function SettingsPage() {
         )}
         className="panel max-w-2xl space-y-6 p-5"
       >
-        <div>
-          <h2 className="mb-1 text-sm font-semibold text-ink">Business type</h2>
-          <p className="mb-3 text-xs text-slate">
-            Pick what fits best - it sets your categories, units (kg, litres, metres…) and the extra invoice fields.
-          </p>
-          <BusinessTypePicker
-            value={watchedType}
-            onChange={(v: BusinessType) => setValue("business_type", v, { shouldDirty: true })}
-          />
-          {typeHint ? <p className="mt-2 text-xs text-slate">{typeHint}</p> : null}
-          <p className="mt-1 text-[11px] text-slate-dim">
-            Changes labels and optional fields only - tax, stock and billing stay exactly the same.
-          </p>
-        </div>
-
         <div>
           <h2 className="mb-3 text-sm font-semibold text-ink">Country &amp; tax registration</h2>
           <div className="grid gap-4 sm:grid-cols-2">

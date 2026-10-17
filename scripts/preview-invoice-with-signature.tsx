@@ -142,8 +142,8 @@ async function main() {
     <InvoicePdfDocument
       invoice={invoice}
       company={company}
-      logoSrc={fileToDataUrl(path.join(root, "public/logo/kyro-icon.png"))}
-      wordmarkSrc={fileToDataUrl(path.join(root, "public/logo/kyro-full.png"))}
+      logoSrc={fileToDataUrl(path.join(root, "public/logo/kayyro-icon.png"))}
+      wordmarkSrc={fileToDataUrl(path.join(root, "public/logo/kayyro-full.png"))}
       signatureSrc={fs.existsSync(sigPath) ? fileToDataUrl(sigPath) : null}
       businessType="general"
     />

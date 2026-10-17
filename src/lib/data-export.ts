@@ -109,6 +109,6 @@ export async function downloadAllData(businessName: string, onProgress?: (label:
   }
   const stamp = new Date().toISOString().slice(0, 10);
   const safe = businessName.replace(/[^\w-]+/g, "-").replace(/-+/g, "-").slice(0, 40) || "business";
-  downloadXlsx(`KYRO-${safe}-all-data-${stamp}.xlsx`, sheets);
+  downloadXlsx(`Kayyro-${safe}-all-data-${stamp}.xlsx`, sheets);
   return { sheets: sheets.length, rows: total };
 }

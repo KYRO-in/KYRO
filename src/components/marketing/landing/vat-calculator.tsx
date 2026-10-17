@@ -99,7 +99,7 @@ export function VatCalculator() {
           </h2>
           <Reveal delay={0.1}>
             <p className="mx-auto mt-5 max-w-xl text-lg text-white/60">
-              This is the same engine that prices every KYRO invoice. Pick your country, change anything and watch it
+              This is the same engine that prices every Kayyro invoice. Pick your country, change anything and watch it
               recalculate.
             </p>
           </Reveal>

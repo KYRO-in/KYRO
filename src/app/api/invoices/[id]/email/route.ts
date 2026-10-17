@@ -61,7 +61,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const orgId = profile?.organization_id as string | undefined;
     if (!orgId) return NextResponse.json({ error: "No organization linked" }, { status: 400 });
 
-    // Keeps a hijacked or abusive account from turning KYRO into a spam relay
+    // Keeps a hijacked or abusive account from turning Kayyro into a spam relay
     const admin = createAdminClient();
     const limited = await rateLimitAll(admin, [
       { key: `email:user:${user.id}:m`, limit: 15, windowSeconds: 60 },

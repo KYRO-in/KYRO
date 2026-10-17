@@ -20,7 +20,7 @@ export type LiveMetalKind = "gold" | "silver" | "platinum" | "palladium" | "diam
 /** Currency used when a business has none (rows are stored per currency). */
 export const LIVE_RATES_CURRENCY = "AED";
 
-/** Every currency a KYRO business can bill in, plus US dollars. */
+/** Every currency a Kayyro business can bill in, plus US dollars. */
 export const LIVE_CURRENCIES: readonly string[] = Array.from(
   new Set(["USD", ...Object.values(COUNTRIES).map((c) => c.currency)])
 );

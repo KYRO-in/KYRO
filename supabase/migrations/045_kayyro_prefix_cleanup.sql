@@ -1,12 +1,12 @@
 -- ============================================================
--- KYRO: finish the rename in databases created before it
+-- Kayyro: finish the rename in databases created before it
 --
 -- Older migrations left two leftovers from earlier product names:
 --   - create_invoice_atomic falls back to the prefix "NF" when the app sends
 --     none (the app always sends the business's own prefix, so this is only
 --     a safety net)
 --   - the legacy company_settings table defaulted to an old brand and "AB"
--- Both now default to KYRO / "KY". Nothing else in the function changes.
+-- Both now default to Kayyro / "KY". Nothing else in the function changes.
 --
 -- Run after 044. Safe to re-run.
 -- ============================================================
@@ -28,7 +28,7 @@ end $$;
 do $$
 begin
   if to_regclass('public.company_settings') is not null then
-    execute $q$alter table public.company_settings alter column brand_name set default 'KYRO'$q$;
+    execute $q$alter table public.company_settings alter column brand_name set default 'Kayyro'$q$;
     execute $q$alter table public.company_settings alter column invoice_prefix set default 'KY'$q$;
   end if;
 end $$;

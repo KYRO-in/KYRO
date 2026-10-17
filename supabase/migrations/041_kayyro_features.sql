@@ -1,5 +1,5 @@
 -- ============================================================
--- KYRO: invoice options, accountant role, plan limits, recurring invoices
+-- Kayyro: invoice options, accountant role, plan limits, recurring invoices
 --
 -- 1) Organization options: Arabic business name, invoice language
 --    (English or English + Arabic), online payment link, document numbering

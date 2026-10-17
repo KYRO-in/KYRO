@@ -95,7 +95,7 @@ async function main() {
   const failures = [];
   const passes = [];
 
-  console.log("KYRO tenant isolation test");
+  console.log("Kayyro tenant isolation test");
   console.log(`App ${APP}`);
   console.log(`A ${emailA}`);
   console.log(`B ${emailB}`);

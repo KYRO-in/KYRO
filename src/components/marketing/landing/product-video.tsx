@@ -6,13 +6,13 @@ import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * The KYRO tour film. Autoplays muted + looped only while it is on screen,
+ * The Kayyro tour film. Autoplays muted + looped only while it is on screen,
  * pauses off screen to save battery/bandwidth, and never autoplays for
  * visitors who ask for reduced motion (they get the poster and a play button).
  */
 export function ProductVideo({
   className,
-  label = "kyro / tour",
+  label = "kayyro / tour",
 }: {
   className?: string;
   label?: string;
@@ -69,8 +69,8 @@ export function ProductVideo({
           loop
           playsInline
           preload="metadata"
-          poster="/marketing/kyro-tour-poster.jpg"
-          aria-label="KYRO product tour: creating a VAT tax invoice, the live dashboard and the VAT 201 summary"
+          poster="/marketing/kayyro-tour-poster.jpg"
+          aria-label="Kayyro product tour: creating a VAT tax invoice, the live dashboard and the VAT 201 summary"
           onPlay={() => setPlaying(true)}
           onPause={() => setPlaying(false)}
           onTimeUpdate={(e) => {
@@ -78,8 +78,8 @@ export function ProductVideo({
             if (v.duration) setProgress(v.currentTime / v.duration);
           }}
         >
-          <source src="/marketing/kyro-tour.webm" type="video/webm" />
-          <source src="/marketing/kyro-tour.mp4" type="video/mp4" />
+          <source src="/marketing/kayyro-tour.webm" type="video/webm" />
+          <source src="/marketing/kayyro-tour.mp4" type="video/mp4" />
         </video>
 
         <button

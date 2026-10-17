@@ -1,27 +1,27 @@
 /** Display-only brand constants (not DB schema). */
-export const APP_NAME = "KYRO";
+export const APP_NAME = "Kayyro";
 export const APP_TAGLINE = "Smart billing for every business";
-export const APP_TITLE = "KYRO - Smart billing for every business";
+export const APP_TITLE = "Kayyro - Smart billing for every business";
 export const APP_DESCRIPTION =
   "VAT and GST invoicing, inventory and customers for businesses in the Gulf, the UK, Europe and India.";
 
 /** Default invoice number prefix for new orgs (editable in Settings). */
 export const DEFAULT_INVOICE_PREFIX = "KY";
 
-/** Transparent KYRO mark - works on light and dark backgrounds. */
-export const BRAND_LOGO_ICON = "/logo/kyro-icon.png";
+/** Transparent Kayyro mark - works on light and dark backgrounds. */
+export const BRAND_LOGO_ICON = "/logo/kayyro-icon.png";
 /** Mark + navy wordmark, for light backgrounds. */
-export const BRAND_LOGO_FULL = "/logo/kyro-full.png";
+export const BRAND_LOGO_FULL = "/logo/kayyro-full.png";
 /** Mark + white wordmark, for dark backgrounds. */
-export const BRAND_LOGO_FULL_WHITE = "/logo/kyro-full-white.png";
+export const BRAND_LOGO_FULL_WHITE = "/logo/kayyro-full-white.png";
 export const BRAND_LOGO_MARK = BRAND_LOGO_ICON;
 
-/** Legal entity that operates KYRO (Privacy Policy / Terms). */
+/** Legal entity that operates Kayyro (Privacy Policy / Terms). */
 export const LEGAL_ENTITY_NAME = "Focused Folks Solutions LLP";
 export const LEGAL_ENTITY_ADDRESS =
   "236, Seventh Heaven, Ahmedabad, Gujarat, 380055";
-/** TODO: replace with the real KYRO support mailbox once the domain is chosen. */
-export const LEGAL_SUPPORT_EMAIL = "support@kyro.example";
+/** TODO: replace with the real Kayyro support mailbox once the domain is chosen. */
+export const LEGAL_SUPPORT_EMAIL = "support@kayyro.example";
 /** Governing law / courts named in the Terms - DRAFT, confirm with counsel. */
 export const LEGAL_GOVERNING_LAW = "the United Arab Emirates";
 export const LEGAL_JURISDICTION = "Dubai, United Arab Emirates";

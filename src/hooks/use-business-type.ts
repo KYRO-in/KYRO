@@ -20,13 +20,13 @@ function subscribe(cb: () => void) {
 }
 
 function getSnapshot() {
-  return typeof window !== "undefined" ? localStorage.getItem("kyro-bt-tick") ?? "0" : "0";
+  return typeof window !== "undefined" ? localStorage.getItem("kayyro-bt-tick") ?? "0" : "0";
 }
 
 /** Call after writing local business type so hooks re-read. */
 export function notifyBusinessTypeLocalChange() {
   try {
-    localStorage.setItem("kyro-bt-tick", String(Date.now()));
+    localStorage.setItem("kayyro-bt-tick", String(Date.now()));
   } catch {
     /* ignore */
   }

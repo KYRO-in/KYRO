@@ -84,7 +84,7 @@ export function RepeatInvoiceModal({
         <div className="space-y-4 text-sm">
           <p className="text-ink">
             Done. The next invoice for <strong>{invoice.customer?.name}</strong> is due on{" "}
-            <strong>{formatDate(start)}</strong>. When it&apos;s due, KYRO shows it on your dashboard and you create it with one
+            <strong>{formatDate(start)}</strong>. When it&apos;s due, Kayyro shows it on your dashboard and you create it with one
             tap.
           </p>
           <div className="flex justify-end gap-2">

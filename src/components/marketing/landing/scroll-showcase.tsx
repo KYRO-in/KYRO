@@ -12,35 +12,35 @@ const STEPS = [
     title: "Tax invoices in seconds",
     body: "Pick a customer, add items. VAT or GST is worked out on every line under your country's rules, your tax number prints automatically, and prices can include or exclude tax.",
     img: "/marketing/showcase/invoice-step3.webp",
-    label: "kyro / invoices / new",
+    label: "kayyro / invoices / new",
   },
   {
     kicker: "Overview",
     title: "Your business, live",
     body: "Revenue, outstanding balances, stock alerts and customers on one calm dashboard, always up to date.",
     img: "/marketing/showcase/dashboard.webp",
-    label: "kyro / dashboard",
+    label: "kayyro / dashboard",
   },
   {
     kicker: "Compliance",
     title: "Your tax return, ready to file",
     body: "Output tax, input tax from purchases and the net payable, in your country's layout - UAE VAT 201, Saudi VAT return, UK 9-box or India GSTR-3B - and exported to Excel.",
     img: "/marketing/showcase/vat201b.webp",
-    label: "kyro / reports / vat 201",
+    label: "kayyro / reports / vat 201",
   },
   {
     kicker: "Relationships",
     title: "Customers and credit, tracked",
     body: "A ledger for every customer with part payments, balances due and one-tap WhatsApp reminders.",
     img: "/marketing/showcase/customers.webp",
-    label: "kyro / customers",
+    label: "kayyro / customers",
   },
   {
     kicker: "Inventory",
     title: "Stock that stays honest",
     body: "Every invoice moves stock. Low-stock alerts, batches, warehouses and zero-, standard- and exempt-rated items.",
     img: "/marketing/showcase/products.webp",
-    label: "kyro / products",
+    label: "kayyro / products",
   },
 ];
 
@@ -55,7 +55,7 @@ function Frame({ step, priority = false }: { step: (typeof STEPS)[number]; prior
       </div>
       <Image
         src={step.img}
-        alt={`${step.title} - KYRO screenshot`}
+        alt={`${step.title} - Kayyro screenshot`}
         width={1920}
         height={1080}
         priority={priority}
@@ -85,7 +85,7 @@ export function ScrollShowcase() {
           <h2 className="mx-auto mt-3 max-w-3xl font-display text-4xl font-extrabold tracking-[-0.035em] text-white sm:text-6xl">
             Everything you bill, track and file.
           </h2>
-          <p className="mx-auto mt-5 max-w-xl text-lg text-white/60">Scroll to walk through a day in KYRO.</p>
+          <p className="mx-auto mt-5 max-w-xl text-lg text-white/60">Scroll to walk through a day in Kayyro.</p>
         </Reveal>
       </div>
 

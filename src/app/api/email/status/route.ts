@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 /** Whether invoice emails go out directly (Resend) or fall back to the user's mail app. */
 export async function GET() {
   if (isDemoMode()) {
-    return NextResponse.json({ configured: true, provider: "demo", fromAddress: "demo@kyro.local" });
+    return NextResponse.json({ configured: true, provider: "demo", fromAddress: "demo@kayyro.local" });
   }
   const supabase = await createClient();
   const {

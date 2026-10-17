@@ -2,7 +2,7 @@
  * Server-only email sending. Provider: Resend (https://resend.com) over its REST API,
  * so no extra dependency. Configure in the environment:
  *   RESEND_API_KEY = re_...
- *   EMAIL_FROM     = "KYRO <invoices@your-domain.com>"   (a domain verified in Resend)
+ *   EMAIL_FROM     = "Kayyro <invoices@your-domain.com>"   (a domain verified in Resend)
  */
 
 export type EmailAttachment = { filename: string; content: Buffer };

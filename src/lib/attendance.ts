@@ -1,5 +1,5 @@
 /**
- * Attendance maths shared by the Attendance pages, the punch API and Ask KYRO.
+ * Attendance maths shared by the Attendance pages, the punch API and Ask Kayyro.
  * Punches are stored as instants (UTC); everything a person reads - "today",
  * "checked in at 09:04", "late" - is worked out in the shop's local time zone.
  */
@@ -177,7 +177,7 @@ export function formatMinutes(min: number): string {
   return m ? `${h}h ${m}m` : `${h}h`;
 }
 
-/** Per-employee totals for a date range, for reports and Ask KYRO. */
+/** Per-employee totals for a date range, for reports and Ask Kayyro. */
 export function summariseAttendance(
   employees: EmployeeLike[],
   punches: PunchLike[],

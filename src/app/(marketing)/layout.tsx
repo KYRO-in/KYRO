@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     title: APP_TITLE,
     description: APP_DESCRIPTION,
     type: "website",
-    images: [{ url: "/marketing/kyro-tour-poster.jpg", width: 1600, height: 900 }],
+    images: [{ url: "/marketing/kayyro-tour-poster.jpg", width: 1600, height: 900 }],
   },
 };
 

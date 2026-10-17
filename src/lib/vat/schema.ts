@@ -9,7 +9,7 @@ let confirmed = false;
  */
 export async function ensureTaxSchema(supabase: SupabaseClient): Promise<void> {
   if (confirmed) return;
-  const { data, error } = await supabase.rpc("kyro_schema_version");
+  const { data, error } = await supabase.rpc("kayyro_schema_version");
   if (error || Number(data) < 42) {
     throw new Error(
       "Your database needs one update for this country's tax rules. Run supabase/migrations/042_multi_country_tax.sql in the Supabase SQL Editor, then try again."

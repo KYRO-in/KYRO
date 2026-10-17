@@ -21,13 +21,13 @@ export const metadata: Metadata = {
     title: APP_TITLE,
     description: APP_DESCRIPTION,
     type: "website",
-    images: [{ url: "/marketing/kyro-tour-poster.jpg", width: 1600, height: 900 }],
+    images: [{ url: "/marketing/kayyro-tour-poster.jpg", width: 1600, height: 900 }],
   },
   twitter: {
     card: "summary_large_image",
     title: APP_TITLE,
     description: APP_DESCRIPTION,
-    images: ["/marketing/kyro-tour-poster.jpg"],
+    images: ["/marketing/kayyro-tour-poster.jpg"],
   },
 };
 
@@ -54,7 +54,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "I sell to customers in other countries. Is that covered?",
-    a: "Yes. Give the customer their country and KYRO suggests the right treatment: reverse charge for VAT-registered businesses in another EU country, zero-rated export for everyone else abroad. The legal wording prints on the invoice, and you can change it on any bill.",
+    a: "Yes. Give the customer their country and Kayyro suggests the right treatment: reverse charge for VAT-registered businesses in another EU country, zero-rated export for everyone else abroad. The legal wording prints on the invoice, and you can change it on any bill.",
   },
   {
     q: "Is my data safe?",

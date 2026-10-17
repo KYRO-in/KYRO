@@ -61,7 +61,7 @@ export function DataSection() {
           <Database className="h-4 w-4 text-primary" /> Your data
         </h2>
         <p className="mt-1 text-sm text-slate">
-          Everything you keep in KYRO belongs to you. Download a full copy any time, for your records or your accountant.
+          Everything you keep in Kayyro belongs to you. Download a full copy any time, for your records or your accountant.
         </p>
       </div>
 
@@ -97,7 +97,7 @@ export function DataSection() {
         )}
       </div>
 
-      <Modal open={closeOpen} onClose={() => setCloseOpen(false)} title="Close your KYRO account?">
+      <Modal open={closeOpen} onClose={() => setCloseOpen(false)} title="Close your Kayyro account?">
         <div className="space-y-4 text-sm">
           <p className="text-slate">
             Type <strong className="text-ink">{businessName}</strong> to confirm. You can cancel the request until we&apos;ve

@@ -1,6 +1,6 @@
 /**
  * Copies the barcode scanner engine (zxing WebAssembly) into public/scanner so
- * the camera scanner loads it from KYRO's own domain instead of a CDN.
+ * the camera scanner loads it from Kayyro's own domain instead of a CDN.
  * Runs automatically after `npm install` (postinstall).
  */
 import { copyFileSync, existsSync, mkdirSync } from "fs";

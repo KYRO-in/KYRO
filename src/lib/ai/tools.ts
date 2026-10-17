@@ -1,9 +1,9 @@
-import type Anthropic from "@anthropic-ai/sdk";
+import type { AiTool } from "@/lib/ai/provider";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { roundMoney } from "@/lib/utils";
 
 /**
- * Read-only tools for Ask KYRO. Every query runs with the signed-in user's
+ * Read-only tools for Ask Kayyro. Every query runs with the signed-in user's
  * Supabase session, so row level security keeps each business to its own data.
  */
 
@@ -11,7 +11,7 @@ type Json = Record<string, unknown>;
 
 const DATE = { type: "string", description: "Date as YYYY-MM-DD" } as const;
 
-export const AI_TOOLS: Anthropic.Beta.BetaTool[] = [
+export const AI_TOOLS: AiTool[] = [
   {
     name: "sales_summary",
     description:

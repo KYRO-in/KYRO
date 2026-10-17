@@ -1,6 +1,6 @@
 -- ============================================================
 -- PASTE into Supabase SQL Editor (once), AFTER 037_vat_gcc.sql
--- KYRO: every kind of business + email invoices
+-- Kayyro: every kind of business + email invoices
 --
 --   1) More business types (fresh produce, restaurants, hardware,
 --      furniture & appliances, auto parts, wholesale, salons, perfumes)

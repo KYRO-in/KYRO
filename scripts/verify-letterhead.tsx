@@ -51,8 +51,8 @@ async function main() {
 
   ensureInvoicePdfFonts();
   const root = path.resolve(__dirname, "..");
-  const logoSrc = fileToDataUrl(path.join(root, "public/logo/kyro-icon.png"));
-  const wordmarkSrc = fileToDataUrl(path.join(root, "public/logo/kyro-full.png"));
+  const logoSrc = fileToDataUrl(path.join(root, "public/logo/kayyro-icon.png"));
+  const wordmarkSrc = fileToDataUrl(path.join(root, "public/logo/kayyro-full.png"));
 
   const company: CompanySettings = {
     id: "preview",

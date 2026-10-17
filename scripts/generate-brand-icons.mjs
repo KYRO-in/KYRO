@@ -1,5 +1,5 @@
 /**
- * Generate the KYRO logo files, favicons and PWA icons from the source artwork
+ * Generate the Kayyro logo files, favicons and PWA icons from the source artwork
  * in assets/brand/.
  *
  * Run: node scripts/generate-brand-icons.mjs
@@ -11,8 +11,9 @@ import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
-const markSrc = join(root, "assets", "brand", "kyro-mark-source.webp");
-const logoSrc = join(root, "assets", "brand", "kyro-logo-source.png");
+const markSrc = join(root, "assets", "brand", "kayyro-mark-source.webp");
+const WORDMARK = "KAYYRO";
+const WORDMARK_FONT = { font: "Segoe UI Black", fontfile: process.env.WORDMARK_FONTFILE || "C:/Windows/Fonts/seguibl.ttf" };
 const outLogo = join(root, "public", "logo");
 const outIcons = join(root, "public", "icons");
 
@@ -38,21 +39,38 @@ async function square(buf, size, padRatio, background) {
   return img.png().toBuffer();
 }
 
-/** Recolour the dark navy wordmark letters to white for dark backgrounds. */
-async function whiteWordmark(buf) {
-  const { data, info } = await sharp(buf).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
-  for (let i = 0; i < data.length; i += 4) {
-    const [r, g, b, a] = [data[i], data[i + 1], data[i + 2], data[i + 3]];
-    if (a === 0) continue;
-    // Letters are near #0B1238; the purple mark is far brighter in red/blue.
-    const isInk = r < 70 && g < 70 && b < 110;
-    if (isInk) {
-      data[i] = 255;
-      data[i + 1] = 255;
-      data[i + 2] = 255;
-    }
-  }
-  return sharp(data, { raw: info }).png().toBuffer();
+/** The word "KAYYRO" as a trimmed transparent PNG in the given ink colour. */
+async function wordmark(color) {
+  const img = await sharp({
+    text: {
+      text: `<span foreground="${color}">${WORDMARK}</span>`,
+      ...WORDMARK_FONT,
+      rgba: true,
+      dpi: 1200,
+    },
+  })
+    .png()
+    .toBuffer();
+  return sharp(img).trim({ threshold: 1 }).png().toBuffer();
+}
+
+/** Mark + wordmark side by side, `height` px tall, on a transparent background. */
+async function fullLogo(markBuf, color, height) {
+  const markImg = await sharp(markBuf).resize({ height }).png().toBuffer();
+  const markMeta = await sharp(markImg).metadata();
+  // Capital letters are about 44% of the mark's height, centred beside it
+  const wmRaw = await wordmark(color);
+  const wmImg = await sharp(wmRaw).resize({ height: Math.round(height * 0.44) }).png().toBuffer();
+  const wmMeta = await sharp(wmImg).metadata();
+  const gap = Math.round(height * 0.16);
+  const width = markMeta.width + gap + wmMeta.width;
+  return sharp({ create: { width, height, channels: 4, background: CLEAR } })
+    .composite([
+      { input: markImg, left: 0, top: 0 },
+      { input: wmImg, left: markMeta.width + gap, top: Math.round((height - wmMeta.height) / 2) },
+    ])
+    .png()
+    .toBuffer();
 }
 
 /** Minimal .ico container holding PNG images (supported by every modern browser). */
@@ -80,20 +98,18 @@ function buildIco(pngs) {
 }
 
 const mark = await trimmed(markSrc);
-const logo = await trimmed(logoSrc);
 
 // Logos used inside the app, the website and invoice PDFs
-await sharp(await square(mark, 1024, 0.04)).toFile(join(outLogo, "kyro-icon.png"));
-const logoSized = await sharp(logo).resize({ height: 240 }).png().toBuffer();
-await sharp(logoSized)
+await sharp(await square(mark, 1024, 0.04)).toFile(join(outLogo, "kayyro-icon.png"));
+await sharp(await fullLogo(mark, "#0B1238", 240))
   .extend({ top: 12, bottom: 12, left: 12, right: 12, background: CLEAR })
   .png()
-  .toFile(join(outLogo, "kyro-full.png"));
-await sharp(await whiteWordmark(logoSized))
+  .toFile(join(outLogo, "kayyro-full.png"));
+await sharp(await fullLogo(mark, "#FFFFFF", 240))
   .extend({ top: 12, bottom: 12, left: 12, right: 12, background: CLEAR })
   .png()
-  .toFile(join(outLogo, "kyro-full-white.png"));
-console.log("wrote public/logo/kyro-icon.png, kyro-full.png, kyro-full-white.png");
+  .toFile(join(outLogo, "kayyro-full-white.png"));
+console.log("wrote public/logo/kayyro-icon.png, kayyro-full.png, kayyro-full-white.png");
 
 // Browser tab icons: transparent, tight padding so the mark reads at 16px
 const tab = async (size) => square(mark, size, 0.04);

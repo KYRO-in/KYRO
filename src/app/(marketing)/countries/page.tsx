@@ -50,15 +50,15 @@ const FEATURES = [
 const FAQ = [
   {
     q: "Can I change country later?",
-    a: "Yes, in Settings. New invoices follow the new country's rules and currency, and invoices you already issued keep theirs. KYRO also offers to move your products to the new standard rate in one click.",
+    a: "Yes, in Settings. New invoices follow the new country's rules and currency, and invoices you already issued keep theirs. Kayyro also offers to move your products to the new standard rate in one click.",
   },
   {
     q: "I sell to customers in other countries. What happens?",
     a: "Give each customer their country. Inside the EU, a business customer with a VAT number is reverse charged; everyone else abroad is treated as an export and zero-rated. The suggested treatment is shown on the invoice and you can change it.",
   },
   {
-    q: "Does KYRO connect to ZATCA, HMRC or the GST portal?",
-    a: "Not yet. KYRO prints the ZATCA QR code (phase 1) and prepares your return in the official layout, ready for you or your accountant to file. Direct submission (ZATCA phase 2, HMRC Making Tax Digital, GST e-invoicing) is on the roadmap.",
+    q: "Does Kayyro connect to ZATCA, HMRC or the GST portal?",
+    a: "Not yet. Kayyro prints the ZATCA QR code (phase 1) and prepares your return in the official layout, ready for you or your accountant to file. Direct submission (ZATCA phase 2, HMRC Making Tax Digital, GST e-invoicing) is on the roadmap.",
   },
   {
     q: "What if a rate changes?",

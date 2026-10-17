@@ -8,7 +8,7 @@ let registerFailed = false;
 let arabicRegistered = false;
 
 /** Arabic glyphs (self-hosted in public/fonts/pdf). Used as a fallback for any Arabic text. */
-export const PDF_ARABIC_FAMILY = "KyroArabic";
+export const PDF_ARABIC_FAMILY = "KayyroArabic";
 
 function fontUrl(path: string) {
   return typeof window !== "undefined" ? `${window.location.origin}${path}` : path;

@@ -53,7 +53,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { getCountryConfig } from "@/lib/vat/countries";
 
-const GOAL_KEY = "kyro-goal:";
+const GOAL_KEY = "kayyro-goal:";
 
 function readLocalGoal(orgId?: string): number | null {
   if (!orgId) return null;

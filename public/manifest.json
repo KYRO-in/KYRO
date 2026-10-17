@@ -1,6 +1,6 @@
 {
-  "name": "KYRO",
-  "short_name": "KYRO",
+  "name": "Kayyro",
+  "short_name": "Kayyro",
   "description": "VAT tax invoices, inventory, and customers for the UAE.",
   "start_url": "/login",
   "display": "standalone",

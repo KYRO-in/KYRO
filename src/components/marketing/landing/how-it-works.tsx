@@ -42,25 +42,25 @@ const STEPS = [
     title: "Who is it for?",
     body: "Search a customer by name, phone or tax number - or add a new one without leaving the invoice.",
     img: "/marketing/showcase/howto-step1.webp",
-    label: "kyro / invoices / new · step 1",
+    label: "kayyro / invoices / new · step 1",
   },
   {
     title: "What are they buying?",
     body: "Tap items from your catalog by category, scan a barcode, or type. Weights take decimals, so 1.25 kg is just 1.25.",
     img: "/marketing/showcase/howto-step2.webp",
-    label: "kyro / invoices / new · step 2",
+    label: "kayyro / invoices / new · step 2",
   },
   {
     title: "Check everything",
     body: "VAT is worked out on every line, with a summary by rate. Flip ‘prices include VAT’ if your shelf prices already do.",
     img: "/marketing/showcase/howto-step3.webp",
-    label: "kyro / invoices / new · step 3",
+    label: "kayyro / invoices / new · step 3",
   },
   {
     title: "Send it",
     body: "Email the PDF in one click, share on WhatsApp, or print. Your customer gets a secure download link too.",
     img: "/marketing/showcase/howto-email.webp",
-    label: "kyro / invoices / KY-2026-27-0112",
+    label: "kayyro / invoices / KY-2026-27-0112",
   },
 ];
 
@@ -191,7 +191,7 @@ const CHAPTERS: Chapter[] = [
       "Choose whether your prices include VAT. You can still flip it on any single invoice.",
     ],
     img: "/marketing/showcase/settings.webp",
-    label: "kyro / settings",
+    label: "kayyro / settings",
   },
   {
     id: "catalog",
@@ -201,10 +201,10 @@ const CHAPTERS: Chapter[] = [
     points: [
       "Group products into categories and subcategories - Vegetables › Leafy greens, Bedroom › Mattresses.",
       "Choose how each item is sold: pieces, kg, grams, litres, metres, boxes, cartons, hours or nights.",
-      "Set a reorder level and KYRO flags anything running low on the dashboard.",
+      "Set a reorder level and Kayyro flags anything running low on the dashboard.",
     ],
     img: "/marketing/showcase/products.webp",
-    label: "kyro / products",
+    label: "kayyro / products",
   },
   {
     id: "customers",
@@ -217,7 +217,7 @@ const CHAPTERS: Chapter[] = [
       "The Outstanding page sorts debts by age so you chase the oldest money first.",
     ],
     img: "/marketing/showcase/outstanding.webp",
-    label: "kyro / outstanding",
+    label: "kayyro / outstanding",
   },
   {
     id: "send",
@@ -230,7 +230,7 @@ const CHAPTERS: Chapter[] = [
       "Prefer chat? Share the PDF link on WhatsApp straight from the invoice.",
     ],
     img: "/marketing/showcase/invoices.webp",
-    label: "kyro / invoices",
+    label: "kayyro / invoices",
   },
   {
     id: "dashboard",
@@ -243,7 +243,7 @@ const CHAPTERS: Chapter[] = [
       "A VAT set-aside estimate for the quarter so filing day is never a surprise.",
     ],
     img: "/marketing/showcase/dashboard.webp",
-    label: "kyro / dashboard",
+    label: "kayyro / dashboard",
   },
   {
     id: "vat",
@@ -256,7 +256,7 @@ const CHAPTERS: Chapter[] = [
       "Credit notes and zero-rated or exempt supplies are handled in their own boxes.",
     ],
     img: "/marketing/showcase/vat201b.webp",
-    label: "kyro / reports / vat 201",
+    label: "kayyro / reports / vat 201",
   },
   {
     id: "stock",
@@ -269,7 +269,7 @@ const CHAPTERS: Chapter[] = [
       "Multiple warehouses on the Business plan.",
     ],
     img: "/marketing/showcase/inventory.webp",
-    label: "kyro / inventory",
+    label: "kayyro / inventory",
   },
 ];
 
@@ -351,7 +351,7 @@ export function Chapters() {
                 </ul>
                 <Reveal delay={0.1}>
                   <div className="group transition-transform duration-500 hover:-translate-y-1">
-                    <BrowserFrame src={c.img} label={c.label} alt={`${c.title} - KYRO screenshot`} />
+                    <BrowserFrame src={c.img} label={c.label} alt={`${c.title} - Kayyro screenshot`} />
                   </div>
                 </Reveal>
               </div>

@@ -1,5 +1,5 @@
 -- ============================================================
--- KYRO: security hardening
+-- Kayyro: security hardening
 --
 -- 1) Billing fields on organizations can only be changed by the server
 --    (service role: signup, Razorpay webhook). An admin can still edit every
@@ -10,7 +10,7 @@
 -- 3) Every SECURITY DEFINER function in public gets a fixed search_path and
 --    can no longer be executed by anonymous (signed-out) callers.
 -- 4) Signature images can no longer be listed by anyone on the internet.
--- 5) New organizations default to the KYRO invoice prefix.
+-- 5) New organizations default to the Kayyro invoice prefix.
 --
 -- Additive, data-safe and safe to re-run.
 -- ============================================================
@@ -42,7 +42,7 @@ begin
 
   foreach col in array locked loop
     if (to_jsonb(new) -> col) is distinct from (to_jsonb(old) -> col) then
-      raise exception 'Billing details can only be changed through KYRO billing (%).', col
+      raise exception 'Billing details can only be changed through Kayyro billing (%).', col
         using errcode = '42501';
     end if;
   end loop;
@@ -191,7 +191,7 @@ begin
   end if;
 end $$;
 
--- ---------- 5) KYRO invoice prefix for new organizations ----------
+-- ---------- 5) Kayyro invoice prefix for new organizations ----------
 alter table public.organizations alter column invoice_prefix set default 'KY';
 
 select pg_notify('pgrst', 'reload schema');

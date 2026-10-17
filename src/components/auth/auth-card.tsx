@@ -2,7 +2,7 @@ import { AuthLegalFooter } from "@/components/auth/auth-legal-footer";
 import { APP_NAME, BRAND_LOGO_FULL, BRAND_LOGO_FULL_WHITE } from "@/lib/brand";
 import Image from "next/image";
 
-/** Centered card with the KYRO logo, used by the smaller auth pages. */
+/** Centered card with the Kayyro logo, used by the smaller auth pages. */
 export function AuthCard({
   title,
   subtitle,

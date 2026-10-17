@@ -54,7 +54,7 @@ type Held = {
 type Method = "cash" | "card" | "bank_transfer" | "split" | "later";
 type Sale = { invoice: Invoice; receipt: ReceiptData; change: number; paymentError?: string };
 
-const HELD_KEY = "kyro-pos-held";
+const HELD_KEY = "kayyro-pos-held";
 const WALK_IN = "Walk-in Customer";
 
 const isWalkIn = (c: Customer | null | undefined) => !!c && /^walk[\s-]?in\b/i.test(c.name.trim());

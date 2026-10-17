@@ -1,5 +1,5 @@
 -- ============================================================
--- PASTE into Supabase SQL Editor (once) — KYRO VAT (UAE first)
+-- PASTE into Supabase SQL Editor (once) — Kayyro VAT (UAE first)
 --
 -- Replaces India GST (CGST/SGST/IGST, GSTIN, HSN) with VAT.
 -- Additive and data-safe:

@@ -14,7 +14,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
       <body style={{ margin: 0, fontFamily: "system-ui, sans-serif", background: "#f8fafc", color: "#0b1023" }}>
         <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
           <div style={{ maxWidth: 420, textAlign: "center" }}>
-            <h1 style={{ fontSize: 20 }}>KYRO couldn&apos;t load</h1>
+            <h1 style={{ fontSize: 20 }}>Kayyro couldn&apos;t load</h1>
             <p style={{ color: "#64748b", fontSize: 14 }}>Please try again in a moment. Your data is safe.</p>
             {error.digest && <p style={{ fontFamily: "monospace", fontSize: 12, color: "#94a3b8" }}>Code: {error.digest}</p>}
             <button

@@ -1,5 +1,5 @@
 {
-  "name": "kyro",
+  "name": "kayyro",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -15,7 +15,6 @@
     "check": "npm run typecheck && npm run lint && npm test && npm run test:db"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.133.0",
     "@hookform/resolvers": "^3.10.0",
     "@react-pdf/renderer": "^4.9.0",
     "@supabase/ssr": "^0.12.7",

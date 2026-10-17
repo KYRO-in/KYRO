@@ -79,7 +79,7 @@ export default function PhoneCheckinPage() {
           <p className="text-center text-white/50">Loading…</p>
         ) : !info.hasPin ? (
           <p className="rounded-2xl bg-white/10 p-4 text-center">
-            Hi {info.name}, your manager hasn&apos;t set your PIN yet. Ask them to set it in KYRO → Staff.
+            Hi {info.name}, your manager hasn&apos;t set your PIN yet. Ask them to set it in Kayyro → Staff.
           </p>
         ) : (
           <>

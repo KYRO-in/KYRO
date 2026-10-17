@@ -1,5 +1,5 @@
 -- ============================================================
--- KYRO: every country's tax
+-- Kayyro: every country's tax
 --
 -- Paste into the Supabase SQL Editor once. Additive, data-safe and safe to
 -- re-run. Nothing is deleted and existing amounts keep their exact value.
@@ -13,7 +13,7 @@
 --    Purchases remember the country and India's input-tax split.
 -- 3) record_payment keeps 3-decimal amounts (a dinar invoice paid in full is
 --    "paid", not left 0.005 short).
--- 4) public.kyro_schema_version() lets the app check this migration ran.
+-- 4) public.kayyro_schema_version() lets the app check this migration ran.
 -- ============================================================
 
 -- ---------- 1) 3-decimal money ----------
@@ -216,14 +216,14 @@ revoke execute on function public.record_payment(jsonb) from public, anon;
 grant execute on function public.record_payment(jsonb) to authenticated, service_role;
 
 -- ---------- 4) Schema version ----------
-create or replace function public.kyro_schema_version()
+create or replace function public.kayyro_schema_version()
 returns integer
 language sql
 stable
 set search_path = public, pg_temp
 as $$ select 42 $$;
 
-revoke execute on function public.kyro_schema_version() from public, anon;
-grant execute on function public.kyro_schema_version() to authenticated, service_role;
+revoke execute on function public.kayyro_schema_version() from public, anon;
+grant execute on function public.kayyro_schema_version() to authenticated, service_role;
 
 select pg_notify('pgrst', 'reload schema');
