@@ -53,6 +53,18 @@ export function aiConfigured(): boolean {
 }
 
 export async function chat(messages: ChatMessage[], tools: AiTool[]): Promise<ChatResult> {
+  try {
+    return await chatOnce(messages, tools);
+  } catch (e) {
+    // Free models now and then emit a malformed tool call (HTTP 400); a second try nearly always works
+    if (e instanceof AiProviderError && e.status === 400 && /tool_use_failed|failed_generation|tool call/i.test(e.message)) {
+      return chatOnce(messages, tools);
+    }
+    throw e;
+  }
+}
+
+async function chatOnce(messages: ChatMessage[], tools: AiTool[]): Promise<ChatResult> {
   const res = await fetch(`${AI_BASE_URL}/chat/completions`, {
     method: "POST",
     headers: {

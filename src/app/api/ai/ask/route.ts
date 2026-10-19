@@ -179,7 +179,13 @@ export async function POST(request: Request) {
       if (e.status === 401 || e.status === 403) {
         return serverError("ai", e, "Ask Kayyro's AI key is not valid. Check AI_API_KEY.");
       }
-      return serverError("ai", e, "Ask Kayyro could not answer just now. Please try again.");
+      if (e.status === 404) {
+        return serverError("ai", e, "Ask Kayyro could not find the AI model. Check AI_MODEL and AI_BASE_URL (provider error 404).");
+      }
+      if (e.status === 413) {
+        return serverError("ai", e, "That question needed too much data for the free AI plan. Ask something shorter or more specific.");
+      }
+      return serverError("ai", e, `Ask Kayyro could not answer just now. Please try again (provider error ${e.status}).`);
     }
     return serverError("ai", e);
   }
