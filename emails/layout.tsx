@@ -1,6 +1,12 @@
 import React from "react";
-import { Body, Container, Head, Html, Preview, Section, Text } from "@react-email/components";
+import { Body, Container, Head, Html, Img, Preview, Section, Text } from "@react-email/components";
 import type { ReactNode } from "react";
+
+/**
+ * Email apps only show images from a public https address. This is the logo file in /public/logo;
+ * set EMAIL_LOGO_URL when exporting if your site lives on another domain.
+ */
+const LOGO_URL = process.env.EMAIL_LOGO_URL || "https://kayyro.com/logo/kayyro-full.png";
 
 export const colors = { primary: "#7c1cf0", soft: "#f3e9ff", ink: "#1a1330", slate: "#5b5670", line: "#e7e3ef" };
 
@@ -12,9 +18,7 @@ export function Layout({ preview, children }: { preview: string; children: React
       <Preview>{preview}</Preview>
       <Body style={{ margin: 0, padding: "32px 12px", backgroundColor: "#f6f4fa", fontFamily: "Helvetica, Arial, sans-serif" }}>
         <Container style={{ maxWidth: 480, margin: "0 auto" }}>
-          <Text style={{ margin: "0 0 16px", fontSize: 22, fontWeight: 800, letterSpacing: 1, color: colors.primary }}>
-            KAYYRO
-          </Text>
+          <Img src={LOGO_URL} alt="Kayyro" width={150} height={44} style={{ margin: "0 0 16px", display: "block" }} />
           <Section
             style={{ backgroundColor: "#ffffff", border: `1px solid ${colors.line}`, borderRadius: 14, padding: "28px 28px 24px" }}
           >
