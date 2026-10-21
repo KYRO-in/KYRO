@@ -90,14 +90,14 @@ export default function LoginPage() {
     }
     setOtpSent(true);
     setResendIn(60);
-    setInfo("We sent a 6-digit code to your email. It expires in a few minutes.");
+    setInfo("We sent a code to your email. It expires in a few minutes.");
   };
 
   const verifyOtp = async () => {
     setError("");
     const code = otp.replace(/\s/g, "");
-    if (code.length < 6) {
-      setError("Enter the 6-digit code from your email.");
+    if (code.length < 6 || code.length > 10) {
+      setError("Enter the code from your email.");
       return;
     }
     setLoading(true);
@@ -260,14 +260,14 @@ export default function LoginPage() {
             otpSent && (
               <Input
                 id="otp"
-                label="6-digit code"
+                label="Code from your email"
                 inputMode="numeric"
                 autoComplete="one-time-code"
                 pattern="[0-9]*"
-                maxLength={6}
+                maxLength={10}
                 required
                 value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 10))}
               />
             )
           )}
