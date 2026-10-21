@@ -12,7 +12,8 @@
     "test": "node scripts/run-unit-tests.mjs",
     "test:db": "node scripts/db-test.mjs",
     "test:isolation": "node scripts/tenant-isolation-test.mjs",
-    "check": "npm run typecheck && npm run lint && npm test && npm run test:db"
+    "check": "npm run typecheck && npm run lint && npm test && npm run test:db",
+    "emails:export": "tsx emails/export.tsx"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -38,6 +39,8 @@
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",
+    "@react-email/components": "^1.0.12",
+    "@react-email/render": "^2.1.1",
     "@types/node": "^20",
     "@types/qrcode": "^1.5.5",
     "@types/react": "^19.3.0",
