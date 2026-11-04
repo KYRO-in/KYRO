@@ -187,7 +187,7 @@ const CHAPTERS: Chapter[] = [
     title: "Set up your business",
     points: [
       "Sign up with your business name and pick your trade - 16 are built in, from fruit & vegetables to furniture.",
-      "Pick your country, then add your tax number (TRN, VAT number or GSTIN), address, bank details and signature once; they print on every invoice.",
+      "Pick your country, then add your tax number (TRN or VAT number), address, bank details and signature once; they print on every invoice.",
       "Choose whether your prices include VAT. You can still flip it on any single invoice.",
     ],
     img: "/marketing/showcase/settings.webp",
@@ -249,9 +249,9 @@ const CHAPTERS: Chapter[] = [
     id: "vat",
     icon: BarChart3,
     kicker: "Compliance",
-    title: "VAT & GST returns",
+    title: "VAT returns",
     points: [
-      "Your return in your country's layout: UAE VAT 201 by emirate, Saudi VAT return, UK 9-box, India GSTR-3B with IGST / CGST / SGST, or output and input VAT for the rest.",
+      "Your return in your country's layout: UAE VAT 201 by emirate, or the Saudi, Bahrain and Oman VAT returns with output and input VAT. Qatar and Kuwait get a sales summary.",
       "Export the workbook to Excel for your accountant, along with sales and purchase registers.",
       "Credit notes and zero-rated or exempt supplies are handled in their own boxes.",
     ],

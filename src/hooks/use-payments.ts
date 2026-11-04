@@ -77,53 +77,9 @@ export function usePaymentMutations() {
         payload,
       });
 
-      if (!rpcError) return rpcData as Payment;
-
-      // Fallback if RPC not migrated yet: insert + update invoice manually
-      if (!/function|schema cache|Could not find/i.test(rpcError.message)) {
-        throw rpcError;
-      }
-
-      const { data: payment, error: pErr } = await supabase
-        .from("payments")
-        .insert({
-          organization_id: orgId,
-          customer_id: input.customer_id,
-          invoice_id: input.invoice_id || null,
-          amount: input.amount,
-          payment_date: input.payment_date,
-          payment_mode: input.payment_mode,
-          notes: input.notes ?? null,
-          created_by: user?.id ?? null,
-        })
-        .select()
-        .single();
-      if (pErr) throw pErr;
-
-      if (input.invoice_id) {
-        const { data: inv, error: iErr } = await supabase
-          .from("invoices")
-          .select("id, grand_total, amount_paid, status")
-          .eq("id", input.invoice_id)
-          .single();
-        if (iErr) throw iErr;
-        if (inv.status === "cancelled") {
-          throw new Error("Cannot record payment on a cancelled invoice");
-        }
-        const { invoiceStatusFromPaid } = await import("@/lib/invoice-payment");
-        const newPaid = Math.min(
-          Number(inv.grand_total),
-          Number(inv.amount_paid ?? 0) + input.amount
-        );
-        const status = invoiceStatusFromPaid(newPaid, Number(inv.grand_total));
-        const { error: uErr } = await supabase
-          .from("invoices")
-          .update({ amount_paid: newPaid, status })
-          .eq("id", input.invoice_id);
-        if (uErr) throw uErr;
-      }
-
-      return payment as Payment;
+      // Payments are only recorded by the database function (migration 048)
+      if (rpcError) throw rpcError;
+      return rpcData as Payment;
     },
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: ["payments"] });

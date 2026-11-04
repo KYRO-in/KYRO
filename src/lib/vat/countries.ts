@@ -154,7 +154,8 @@ function eu(
     code,
     name,
     group: "Europe",
-    enabled: true,
+    // GCC-only for now: kept so an existing business here keeps working
+    enabled: false,
     taxSystem: "vat",
     taxName: "VAT",
     currency,
@@ -386,7 +387,8 @@ export const COUNTRIES: Record<CountryCode, CountryVatConfig> = {
     code: "GB",
     name: "United Kingdom",
     group: "United Kingdom",
-    enabled: true,
+    // GCC-only for now: kept so an existing business here keeps working
+    enabled: false,
     taxSystem: "vat",
     taxName: "VAT",
     currency: "GBP",
@@ -419,7 +421,8 @@ export const COUNTRIES: Record<CountryCode, CountryVatConfig> = {
     code: "IN",
     name: "India",
     group: "India",
-    enabled: true,
+    // GCC-only for now: kept so an existing business here keeps working
+    enabled: false,
     taxSystem: "gst",
     taxName: "GST",
     currency: "INR",
@@ -494,6 +497,27 @@ for (const [code, dial] of Object.entries(EU_DIAL)) {
 // Forint amounts are invoiced in whole forints
 COUNTRIES.HU.currencyDecimals = 0;
 
+/**
+ * Qatar and Kuwait have no VAT yet. When one of them introduces it, set its
+ * rate here (e.g. QA: 5) and the country switches to VAT everywhere: tax
+ * lines, "Tax Invoice" title, VAT number label and a VAT return.
+ */
+export const GCC_VAT_SWITCH: Partial<Record<"QA" | "KW", number>> = {};
+
+for (const [code, rate] of Object.entries(GCC_VAT_SWITCH)) {
+  if (!rate) continue;
+  Object.assign(COUNTRIES[code as CountryCode], {
+    taxSystem: "vat",
+    taxName: "VAT",
+    standardRate: rate,
+    rates: zeroAndStandard(rate),
+    taxIdLabel: "VAT No.",
+    taxIdHint: "VAT registration number",
+    invoiceTitle: "Tax Invoice",
+    returnName: "VAT return",
+  } satisfies Partial<CountryVatConfig>);
+}
+
 export const DEFAULT_COUNTRY: CountryCode = "AE";
 
 export const COUNTRY_GROUPS: CountryGroup[] = ["Gulf", "United Kingdom", "Europe", "India"];
@@ -506,12 +530,31 @@ export const ENABLED_COUNTRIES = Object.values(COUNTRIES)
       (a.group === "Gulf" ? 0 : a.name.localeCompare(b.name))
   );
 
-/** Select options grouped by region, e.g. "Gulf · Saudi Arabia". */
-export function countryOptions(): { value: string; label: string }[] {
-  return ENABLED_COUNTRIES.map((c) => ({
-    value: c.code,
-    label: c.group === "United Kingdom" || c.group === "India" ? c.name : `${c.name} · ${c.group}`,
-  }));
+/** The Gulf countries offered to new businesses (GCC-only for now). */
+export const OFFERED_GROUPS: CountryGroup[] = COUNTRY_GROUPS.filter((g) => ENABLED_COUNTRIES.some((c) => c.group === g));
+
+/**
+ * Country select options. A business already set to a country that is no
+ * longer offered (e.g. an older UK or India account) still sees its own
+ * country in the list, so saving Settings never changes it by accident.
+ */
+export function countryOptions(keep?: string | null): { value: string; label: string }[] {
+  const list = [...ENABLED_COUNTRIES];
+  const current = keep ? COUNTRIES[keep.toUpperCase() as CountryCode] : undefined;
+  if (current && !current.enabled) list.push(current);
+  return list.map((c) => ({ value: c.code, label: c.name }));
+}
+
+/**
+ * Where a customer or supplier is based. Gulf businesses also trade with the
+ * rest of the world (exports, imports), so every country stays here: the GCC
+ * first, then the others.
+ */
+export function partyCountryOptions(): { value: string; label: string }[] {
+  const others = Object.values(COUNTRIES)
+    .filter((c) => !c.enabled)
+    .sort((a, b) => a.name.localeCompare(b.name));
+  return [...ENABLED_COUNTRIES, ...others].map((c) => ({ value: c.code, label: c.name }));
 }
 
 const TIME_ZONE_COUNTRY: Record<string, CountryCode> = {
@@ -558,10 +601,17 @@ const TIME_ZONE_COUNTRY: Record<string, CountryCode> = {
 export function guessCountryFromTimeZone(): CountryCode {
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    return TIME_ZONE_COUNTRY[tz] ?? DEFAULT_COUNTRY;
+    const guess = TIME_ZONE_COUNTRY[tz];
+    // Only suggest a country new businesses can choose
+    return guess && COUNTRIES[guess].enabled ? guess : DEFAULT_COUNTRY;
   } catch {
     return DEFAULT_COUNTRY;
   }
+}
+
+/** A country new businesses can sign up in (the six GCC countries for now). */
+export function isOfferedCountry(code: unknown): code is CountryCode {
+  return isCountryCode(code) && COUNTRIES[(code as string).toUpperCase() as CountryCode].enabled;
 }
 
 export function isCountryCode(code: unknown): code is CountryCode {

@@ -65,8 +65,8 @@ export default function PrivacyPolicyPage() {
             Password (stored in encrypted/hashed form, never in plain text)
           </li>
           <li>
-            Payment and billing information (processed by our payment partner,
-            Razorpay - we do not store your card/UPI details ourselves)
+            Payment and billing information (processed by our payment partners,
+            Stripe and Razorpay - we do not store your card/UPI details ourselves)
           </li>
         </ul>
         <p>
@@ -119,7 +119,7 @@ export default function PrivacyPolicyPage() {
         <p>We share information only with:</p>
         <ul>
           <li>
-            <strong>Payment processors</strong> (Razorpay) - to process your
+            <strong>Payment processors</strong> (Stripe, Razorpay) - to process your
             subscription payments
           </li>
           <li>

@@ -1,6 +1,6 @@
 "use client";
 
-import { PAID_PLANS, PAID_PLAN_ORDER, REGION_PRICES, formatPlanPrice, getPlanChecklist } from "@/lib/billing/plans";
+import { PAID_PLANS, PAID_PLAN_ORDER, PLAN_PRICES, formatPlanPrice, getPlanChecklist } from "@/lib/billing/plans";
 import { cn } from "@/lib/utils";
 import { motion } from "motion/react";
 import { Check, Clock, Minus, Sparkles, Wallet } from "lucide-react";
@@ -131,9 +131,9 @@ export function SavingsCalculator() {
 }
 
 const EXTRA_ROWS: { group: string; label: string; plans: [boolean, boolean, boolean] }[] = [
-  { group: "Billing", label: "Tax invoices with VAT / GST per line, for 35 countries", plans: [true, true, true] },
-  { group: "Billing", label: "Reverse charge, exports and ZATCA QR (Saudi)", plans: [true, true, true] },
-  { group: "Billing", label: "India GST: CGST, SGST, IGST and HSN codes", plans: [true, true, true] },
+  { group: "Billing", label: "Tax invoices with VAT per line, for all 6 GCC countries", plans: [true, true, true] },
+  { group: "Billing", label: "Reverse charge, exports and the ZATCA QR code (Saudi)", plans: [true, true, true] },
+  { group: "Billing", label: "English + Arabic invoices, in your own currency", plans: [true, true, true] },
   { group: "Billing", label: "Email & WhatsApp invoices and reminders", plans: [true, true, true] },
   { group: "Billing", label: "Bulk email to many customers", plans: [true, true, true] },
   { group: "Catalog", label: "Units (kg, L, m, box…) with decimal quantities", plans: [true, true, true] },
@@ -170,10 +170,10 @@ export function ComparisonTable() {
                         {PAID_PLANS[id].name}
                       </span>
                       <span className="block font-mono text-xs font-normal text-white/50">
-                        {formatPlanPrice(REGION_PRICES.global[id].monthly)} / mo
+                        {formatPlanPrice(PLAN_PRICES[id].monthly)} / mo
                       </span>
                       <span className="block font-mono text-[11px] font-normal text-white/35">
-                        {formatPlanPrice(REGION_PRICES.india[id].monthly, "india")} in India
+                        or {formatPlanPrice(PLAN_PRICES[id].annual)} / year
                       </span>
                     </th>
                   ))}

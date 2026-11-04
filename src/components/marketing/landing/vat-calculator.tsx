@@ -1,8 +1,8 @@
 "use client";
 
 import { amountInWords } from "@/lib/amount-in-words";
-import { calcLineVat, splitTax, type VatCategory } from "@/lib/vat";
-import { countryOptions, getCountryConfig, INDIA_STATES } from "@/lib/vat/countries";
+import { calcLineVat, type VatCategory } from "@/lib/vat";
+import { countryOptions, getCountryConfig } from "@/lib/vat/countries";
 import { cn, currencyDecimals } from "@/lib/utils";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useMemo, useState } from "react";
@@ -31,13 +31,10 @@ export function VatCalculator() {
   const [qty, setQty] = useState("12");
   const [choiceId, setChoiceId] = useState("std");
   const [inclusive, setInclusive] = useState(false);
-  /** India: buyer in the seller's state (CGST + SGST) or another state (IGST) */
-  const [sameState, setSameState] = useState(true);
 
   const country = getCountryConfig(countryCode);
   const taxName = country.taxName;
   const decimals = currencyDecimals(country.currency);
-  const gst = country.taxSystem === "gst";
 
   // The rates this country uses, then zero-rated and exempt
   const choices = useMemo<Choice[]>(() => {
@@ -46,7 +43,7 @@ export function VatCalculator() {
     }
     const rated = country.rates
       .filter((r) => r.rate > 0)
-      .slice(0, gst ? 4 : 3)
+      .slice(0, 3)
       .map((r, i) => ({
         id: i === 0 ? "std" : `r${r.rate}`,
         label: i === 0 ? `Standard ${r.rate}%` : `${r.rate}%`,
@@ -56,24 +53,22 @@ export function VatCalculator() {
       }));
     return [
       ...rated,
-      { id: "zero", label: gst ? "Nil-rated" : "Zero-rated", hint: "e.g. qualifying exports", rate: 0, category: "zero" },
+      { id: "zero", label: "Zero-rated", hint: "e.g. qualifying exports", rate: 0, category: "zero" },
       { id: "exempt", label: "Exempt", hint: "No tax, no recovery", rate: 0, category: "exempt" },
     ];
-  }, [country, gst]);
+  }, [country]);
 
   const choice = choices.find((c) => c.id === choiceId) ?? choices[0];
-  const split = gst ? (sameState ? "cgst_sgst" : "igst") : "single";
 
   const result = useMemo(() => {
     const p = Math.max(0, Number(price) || 0);
     const q = Math.max(0, Number(qty) || 0);
     return calcLineVat(
       { quantity: q, unitPrice: p, vatRate: choice.rate, vatCategory: choice.category },
-      { pricesIncludeVat: inclusive, decimals, split, taxFree: country.taxSystem === "none" }
+      { pricesIncludeVat: inclusive, decimals, taxFree: country.taxSystem === "none" }
     );
-  }, [price, qty, choice, inclusive, decimals, split, country.taxSystem]);
+  }, [price, qty, choice, inclusive, decimals, country.taxSystem]);
 
-  const parts = splitTax(result.vatAmount, split, decimals);
   const words = useMemo(() => amountInWords(result.lineTotal, country.currency), [result.lineTotal, country.currency]);
   const badge =
     country.taxSystem === "none"
@@ -93,7 +88,7 @@ export function VatCalculator() {
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#c98bff]">Try it right here</p>
           </Reveal>
           <h2 className="mt-3 font-display text-4xl font-extrabold tracking-[-0.035em] text-white sm:text-6xl">
-            <WordsReveal text="VAT and GST, worked out." inView />
+            <WordsReveal text="Gulf VAT, worked out." inView />
             <br />
             <WordsReveal text="To the last cent." inView delay={0.2} className="text-[#c98bff]" />
           </h2>
@@ -180,28 +175,6 @@ export function VatCalculator() {
               </div>
             </fieldset>
 
-            {gst && (
-              <div className="mt-6 grid grid-cols-2 gap-2" role="group" aria-label="Where is the customer?">
-                {[
-                  { v: true, label: "Same state", hint: "CGST + SGST" },
-                  { v: false, label: "Another state", hint: "IGST" },
-                ].map((o) => (
-                  <button
-                    key={o.label}
-                    type="button"
-                    aria-pressed={sameState === o.v}
-                    onClick={() => setSameState(o.v)}
-                    className={cn(
-                      "rounded-2xl border px-4 py-3 text-left transition-colors",
-                      sameState === o.v ? "border-[#b65cff] bg-[#b65cff]/18 text-white" : "border-white/12 text-white/70 hover:border-white/25"
-                    )}
-                  >
-                    <span className="block text-[15px] font-semibold">{o.label}</span>
-                    <span className="mt-0.5 block text-xs text-white/50">{o.hint}</span>
-                  </button>
-                ))}
-              </div>
-            )}
 
             {country.taxSystem !== "none" && (
               <button
@@ -255,17 +228,8 @@ export function VatCalculator() {
               <Row label={country.taxSystem === "none" ? "Amount" : "Taxable amount"}>
                 <AnimatedMoney value={result.taxableValue} currency={country.currency} decimals={decimals} />
               </Row>
-              {country.taxSystem === "none" ? null : split === "cgst_sgst" ? (
-                <>
-                  <Row label={`CGST ${choice.rate / 2}%`}>
-                    <AnimatedMoney value={parts.cgst} currency={country.currency} decimals={decimals} />
-                  </Row>
-                  <Row label={`SGST ${choice.rate / 2}%`}>
-                    <AnimatedMoney value={parts.sgst} currency={country.currency} decimals={decimals} />
-                  </Row>
-                </>
-              ) : (
-                <Row label={split === "igst" ? `IGST ${choice.rate}%` : choice.category === "standard" ? `${taxName} ${choice.rate}%` : taxName}>
+              {country.taxSystem === "none" ? null : (
+                <Row label={choice.category === "standard" ? `${taxName} ${choice.rate}%` : taxName}>
                   <AnimatedMoney value={result.vatAmount} currency={country.currency} decimals={decimals} />
                 </Row>
               )}
@@ -278,11 +242,6 @@ export function VatCalculator() {
               <span className="font-semibold text-white/70">In words: </span>
               {words}
             </p>
-            {gst && (
-              <p className="mt-1 text-xs text-white/35">
-                Place of supply e.g. {INDIA_STATES[15].name} ({INDIA_STATES[15].code}) · HSN / SAC printed per line
-              </p>
-            )}
             {country.currencyDecimals === 3 && (
               <p className="mt-1 text-xs text-white/35">{country.currency} is kept to 3 decimals, as the law expects.</p>
             )}

@@ -1,17 +1,19 @@
-"use client";
-
+// Used in the browser and on the server (automatic reminders render invoice PDFs there).
 import { Font } from "@react-pdf/renderer";
 import { BRAND_FONTS } from "@/lib/brand";
 
 let registered = false;
 let registerFailed = false;
 let arabicRegistered = false;
+/** On the server, fonts are loaded from the site itself (set by ensureInvoicePdfFonts). */
+let serverOrigin = "";
 
 /** Arabic glyphs (self-hosted in public/fonts/pdf). Used as a fallback for any Arabic text. */
 export const PDF_ARABIC_FAMILY = "KayyroArabic";
 
 function fontUrl(path: string) {
-  return typeof window !== "undefined" ? `${window.location.origin}${path}` : path;
+  if (typeof window !== "undefined") return `${window.location.origin}${path}`;
+  return serverOrigin ? `${serverOrigin}${path}` : path;
 }
 
 /**
@@ -20,7 +22,8 @@ function fontUrl(path: string) {
  * correct letter joining. Safe to call multiple times. Falls back to Helvetica
  * if CDN fonts fail.
  */
-export function ensureInvoicePdfFonts(): void {
+export function ensureInvoicePdfFonts(origin?: string): void {
+  if (origin) serverOrigin = origin.replace(/\/$/, "");
   if (!arabicRegistered) {
     try {
       Font.register({

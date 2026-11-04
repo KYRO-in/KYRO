@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { LoadingBlock, PageHeader } from "@/components/ui/page-header";
 import { useToast } from "@/components/ui/toast";
 import { useOrganization } from "@/hooks/use-company";
-import { priceRegionFor } from "@/lib/billing/plans";
+import { aiAllowanceRegionFor, type BillingInterval } from "@/lib/billing/plans";
 import { useBillingEvents } from "@/hooks/use-billing-events";
 import { useOrgAccess } from "@/hooks/use-org-access";
 import { type PaidPlanId } from "@/lib/billing/plans";
@@ -15,7 +15,7 @@ import { isDemoMode } from "@/lib/demo/mode";
 import { formatDate } from "@/lib/utils";
 import Script from "next/script";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { APP_NAME, BRAND_COLORS } from "@/lib/brand";
 
 declare global {
@@ -55,20 +55,35 @@ export default function BillingPage() {
   const qc = useQueryClient();
   const [busyPlan, setBusyPlan] = useState<PaidPlanId | null>(null);
   const [cancelling, setCancelling] = useState(false);
+  const [openingPortal, setOpeningPortal] = useState(false);
   const demo = isDemoMode();
 
   const openCheckout = useCallback(
-    async (plan: PaidPlanId) => {
+    async (plan: PaidPlanId, interval: BillingInterval) => {
       if (demo) {
         toast("Billing is disabled in demo mode", "error");
         return;
       }
       setBusyPlan(plan);
       try {
+        // Card payments go through Stripe (AED) when it is switched on
+        const sres = await fetch("/api/billing/stripe/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ plan, interval }),
+        });
+        const sjson = (await sres.json().catch(() => ({}))) as { error?: string; url?: string; code?: string };
+        if (sres.ok && sjson.url) {
+          window.location.assign(sjson.url);
+          return;
+        }
+        // Stripe not set up yet: carry on with Razorpay below
+        if (sjson.code !== "stripe_not_configured") throw new Error(sjson.error ?? "Could not start checkout");
+
         const res = await fetch("/api/billing/create-subscription", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ plan }),
+          body: JSON.stringify({ plan, interval }),
         });
         const json = (await res.json()) as {
           error?: string;
@@ -112,6 +127,42 @@ export default function BillingPage() {
     [demo, qc, toast]
   );
 
+  const manageBilling = async () => {
+    if (demo) {
+      toast("Billing is disabled in demo mode", "error");
+      return;
+    }
+    setOpeningPortal(true);
+    try {
+      const res = await fetch("/api/billing/stripe/portal", { method: "POST" });
+      const json = (await res.json().catch(() => ({}))) as { error?: string; url?: string };
+      if (!res.ok || !json.url) throw new Error(json.error ?? "Could not open billing");
+      window.location.assign(json.url);
+    } catch (e) {
+      toast((e as Error).message, "error");
+      setOpeningPortal(false);
+    }
+  };
+
+  // Back from Stripe Checkout: the webhook can take a few seconds to activate the plan
+  useEffect(() => {
+    const result = new URLSearchParams(window.location.search).get("checkout");
+    if (!result) return;
+    window.history.replaceState(null, "", window.location.pathname);
+    if (result !== "success") {
+      toast("Checkout cancelled", "error");
+      return;
+    }
+    toast("Payment received - activating your plan…", "success");
+    const refresh = () => {
+      void qc.invalidateQueries({ queryKey: ["organization"] });
+      void qc.invalidateQueries({ queryKey: ["billing_events"] });
+    };
+    refresh();
+    const timers = [3000, 8000, 15000].map((ms) => window.setTimeout(refresh, ms));
+    return () => timers.forEach((t) => window.clearTimeout(t));
+  }, [qc, toast]);
+
   const cancelSubscription = async () => {
     if (demo) {
       toast("Billing is disabled in demo mode", "error");
@@ -147,7 +198,7 @@ export default function BillingPage() {
   const paid =
     org.subscription_status === "active" ||
     org.subscription_status === "past_due" ||
-    (org.plan !== "free" && !!org.razorpay_subscription_id);
+    (org.plan !== "free" && (!!org.razorpay_subscription_id || !!org.stripe_subscription_id));
   const showUpgrade =
     org.subscription_status === "trialing" ||
     org.subscription_status === "cancelled" ||
@@ -160,7 +211,7 @@ export default function BillingPage() {
       <PageHeader
         eyebrow="Account"
         title="Billing"
-        description="Plan, trial, and Razorpay subscription"
+        description="Plan, trial and subscription"
         accent="violet"
       />
 
@@ -198,7 +249,12 @@ export default function BillingPage() {
         </div>
 
         {paid && org.subscription_status !== "cancelled" ? (
-          <div className="mt-6">
+          <div className="mt-6 flex flex-wrap gap-3">
+            {org.stripe_customer_id ? (
+              <Button variant="secondary" loading={openingPortal} onClick={() => void manageBilling()}>
+                Manage card &amp; invoices
+              </Button>
+            ) : null}
             <Button
               variant="secondary"
               loading={cancelling}
@@ -216,9 +272,9 @@ export default function BillingPage() {
           <PricingPlans
             variant="billing"
             hideHeading
-            region={priceRegionFor(org.country)}
+            aiRegion={aiAllowanceRegionFor(org.country)}
             busyPlan={busyPlan}
-            onSelectPlan={(id) => void openCheckout(id)}
+            onSelectPlan={(id, interval) => void openCheckout(id, interval)}
           />
         </div>
       ) : null}
@@ -247,7 +303,7 @@ export default function BillingPage() {
                   <td>{formatDate(e.created_at)}</td>
                   <td className="font-mono text-xs">{e.event_type}</td>
                   <td className="font-mono text-xs text-slate">
-                    {e.razorpay_subscription_id ?? "-"}
+                    {e.stripe_subscription_id ?? e.razorpay_subscription_id ?? "-"}
                   </td>
                 </tr>
               ))}

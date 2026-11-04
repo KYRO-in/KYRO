@@ -66,6 +66,8 @@ export interface Organization {
   business_type?: BusinessType;
   razorpay_customer_id?: string | null;
   razorpay_subscription_id?: string | null;
+  stripe_customer_id?: string | null;
+  stripe_subscription_id?: string | null;
   current_period_end?: string | null;
   cancel_at_period_end?: boolean;
   /** Email: default subject / message for invoice emails ({placeholders} allowed) */
@@ -94,6 +96,9 @@ export interface BillingEvent {
   organization_id: string | null;
   event_type: string;
   razorpay_subscription_id: string | null;
+  /** Which payment provider sent the event (migration 047) */
+  provider?: "razorpay" | "stripe";
+  stripe_subscription_id?: string | null;
   raw_payload: unknown;
   created_at: string;
 }
@@ -350,6 +355,16 @@ export interface Customer {
   country: string;
   customer_type: CustomerType;
   created_at: string;
+  /** Kayyro Collect (migration 049) */
+  payment_terms_days?: number | null;
+  preferred_language?: "auto" | "en" | "ar";
+  preferred_channel?: "whatsapp" | "email" | "both";
+  collect_paused?: boolean;
+  /** When the customer agreed to WhatsApp reminders (null = not opted in) */
+  whatsapp_opt_in_at?: string | null;
+  /** When the customer opted out of reminders (only they can undo it) */
+  collect_opted_out_at?: string | null;
+  collect_token?: string;
 }
 
 export interface Invoice {
@@ -357,6 +372,8 @@ export interface Invoice {
   invoice_number: string;
   customer_id: string;
   invoice_date: string;
+  /** Payment due date (migration 049): invoice date + payment terms */
+  due_date?: string | null;
   subtotal: number;
   total_vat: number;
   round_off: number;
@@ -666,5 +683,148 @@ export interface AttendancePunch {
   accuracy_m: number | null;
   note: string | null;
   created_by: string | null;
+  created_at: string;
+}
+
+// ---------- Kayyro Collect ----------
+export type CollectChannel = "whatsapp" | "email";
+export type CollectMessageStatus =
+  | "pending"
+  | "awaiting_approval"
+  | "ready"
+  | "sending"
+  | "sent"
+  | "failed"
+  | "skipped"
+  | "cancelled"
+  | "received";
+
+export interface CollectSettings {
+  organization_id: string;
+  enabled: boolean;
+  enabled_at: string | null;
+  channel_email: boolean;
+  channel_whatsapp: boolean;
+  tone: number;
+  language: "auto" | "en" | "ar";
+  send_start: string;
+  send_end: string;
+  working_days: number[] | null;
+  time_zone: string | null;
+  ramadan_enabled: boolean;
+  ramadan_start: string | null;
+  ramadan_end: string | null;
+  ramadan_send_start: string;
+  ramadan_send_end: string;
+  approval_mode: "approve" | "auto";
+  default_terms_days: number;
+  include_existing: boolean;
+  /** Phase 2 (migration 050): the AI reads customers' replies */
+  ai_replies?: boolean;
+  /** Phase 3 (migration 051): the owner's daily summary, Business plan */
+  summary_enabled?: boolean;
+  summary_channel?: "email" | "whatsapp";
+  summary_to?: string | null;
+  summary_time?: string;
+  updated_at: string;
+}
+
+export interface ReminderStep {
+  id: string;
+  organization_id: string;
+  offset_days: number;
+  action: "message" | "call_task";
+  step_key: "before_due" | "due_today" | "polite" | "firm" | "call" | "final";
+  active: boolean;
+}
+
+export interface CollectionMessage {
+  id: string;
+  organization_id: string;
+  invoice_id: string | null;
+  customer_id: string | null;
+  step_id: string | null;
+  step_key: string | null;
+  direction: "out" | "in";
+  channel: CollectChannel;
+  status: CollectMessageStatus;
+  local_date: string;
+  sent_on: string | null;
+  auto_send: boolean;
+  manual: boolean;
+  /** reminder, or an answer to / a customer's reply (migration 050) */
+  kind?: "reminder" | "reply";
+  from_address?: string | null;
+  reply_to_id?: string | null;
+  intent?: ReplyIntentName | null;
+  intent_confidence?: number | null;
+  intent_summary?: string | null;
+  intent_promise_date?: string | null;
+  intent_status?: "pending" | "applied" | "needs_you" | null;
+  language: "en" | "ar";
+  subject: string | null;
+  body: string | null;
+  to_address: string | null;
+  wa_template: string | null;
+  wa_variables: string[] | null;
+  provider: string | null;
+  error: string | null;
+  sent_at: string | null;
+  created_at: string;
+}
+
+export interface CollectTask {
+  id: string;
+  organization_id: string;
+  invoice_id: string | null;
+  customer_id: string | null;
+  kind: "call" | "dispute" | "paid_claim" | "promise" | "extension" | "wrong_contact" | "other" | "limit";
+  status: "open" | "done" | "dismissed";
+  title: string;
+  note: string | null;
+  due_date: string | null;
+  created_at: string;
+  message_id?: string | null;
+  claim_id?: string | null;
+}
+
+export interface PaymentPromise {
+  id: string;
+  invoice_id: string;
+  customer_id: string | null;
+  promised_date: string;
+  amount: number | null;
+  status: "open" | "kept" | "broken" | "cancelled";
+  created_at: string;
+}
+
+export type ReplyIntentName =
+  | "already_paid"
+  | "promise_to_pay"
+  | "dispute"
+  | "request_invoice_copy"
+  | "request_extension"
+  | "wrong_contact"
+  | "other";
+
+/** "I already paid" from the payment page or a reply (migration 050) */
+export interface PaymentClaim {
+  id: string;
+  invoice_id: string;
+  customer_id: string | null;
+  source: "payment_page" | "reply";
+  note: string | null;
+  file_path: string | null;
+  file_type: string | null;
+  status: "pending" | "confirmed" | "rejected";
+  created_at: string;
+}
+
+export interface Dispute {
+  id: string;
+  invoice_id: string;
+  customer_id: string | null;
+  reason: string;
+  status: "open" | "resolved";
   created_at: string;
 }

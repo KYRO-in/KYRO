@@ -79,8 +79,8 @@ function WhatsAppDemo() {
 /** Tax numbers from different countries, typed and checked one after another. */
 const TAX_IDS = [
   { label: "Customer TRN · UAE", value: "100234567800003", hint: "15 digits" },
-  { label: "Customer GSTIN · India", value: "29AAACB1234C1Z5", hint: "state code + PAN + Z + check" },
-  { label: "Customer VAT No. · Germany", value: "DE123456789", hint: "DE + 9 digits" },
+  { label: "Customer VATIN · Oman", value: "OM1100000000", hint: "OM + 10 digits" },
+  { label: "Customer VAT Account No. · Bahrain", value: "200000000000002", hint: "15 digits" },
   { label: "Customer VAT No. · Saudi Arabia", value: "300000000000003", hint: "starts and ends with 3" },
 ];
 
@@ -129,7 +129,7 @@ function TrnDemo() {
   );
 }
 
-const RETURNS = ["VAT 201 · UAE", "VAT return · Saudi", "9-box · UK", "GSTR-3B · India", "VAT · 27 EU", "Bahrain · Oman"];
+const RETURNS = ["VAT 201 · UAE", "VAT return · Saudi", "VAT return · Bahrain", "VAT return · Oman", "Sales summary · Qatar", "Sales summary · Kuwait"];
 
 function ReturnsDemo() {
   return (
@@ -347,7 +347,7 @@ export function Bento() {
             <Card
               className="h-full"
               title="Tax numbers, checked for you"
-              body="TRNs, GSTINs and EU or UK VAT numbers are validated as you type, then printed on the invoice."
+              body="UAE TRNs and Saudi, Bahrain and Oman VAT numbers are validated as you type, then printed on the invoice."
             >
               <TrnDemo />
             </Card>

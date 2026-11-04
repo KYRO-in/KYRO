@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
  * Email apps only show images from a public https address. This is the logo file in /public/logo;
  * set EMAIL_LOGO_URL when exporting if your site lives on another domain.
  */
-const LOGO_URL = process.env.EMAIL_LOGO_URL || "https://kayyro.com/logo/kayyro-full.png";
+const LOGO_URL = process.env.EMAIL_LOGO_URL || "https://www.kayyro.com/logo/kayyro-full.png";
 
 export const colors = { primary: "#7c1cf0", soft: "#f3e9ff", ink: "#1a1330", slate: "#5b5670", line: "#e7e3ef" };
 

@@ -64,6 +64,38 @@ export async function chat(messages: ChatMessage[], tools: AiTool[]): Promise<Ch
   }
 }
 
+/**
+ * One answer as a JSON object (no tools), e.g. Kayyro Collect reading a reply.
+ * Asks for JSON mode; providers that don't support it get the same request without it.
+ */
+export async function chatJson(messages: ChatMessage[], maxTokens = 300): Promise<string> {
+  const send = (jsonMode: boolean) =>
+    fetch(`${AI_BASE_URL}/chat/completions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${process.env.AI_API_KEY}` },
+      body: JSON.stringify({
+        model: AI_MODEL,
+        messages,
+        temperature: 0,
+        max_tokens: maxTokens,
+        ...(jsonMode ? { response_format: { type: "json_object" } } : {}),
+      }),
+      signal: AbortSignal.timeout(30_000),
+    });
+  let res = await send(true);
+  if (res.status === 400) {
+    const detail = await res.text().catch(() => "");
+    if (/response_format|json/i.test(detail)) res = await send(false);
+    else throw new AiProviderError(`AI provider returned 400: ${detail.slice(0, 300)}`, 400);
+  }
+  if (!res.ok) {
+    const detail = (await res.text().catch(() => "")).slice(0, 300);
+    throw new AiProviderError(`AI provider returned ${res.status}: ${detail}`, res.status);
+  }
+  const json = (await res.json()) as { choices?: { message?: { content?: string | null } }[] };
+  return (json.choices?.[0]?.message?.content ?? "").trim();
+}
+
 async function chatOnce(messages: ChatMessage[], tools: AiTool[]): Promise<ChatResult> {
   const res = await fetch(`${AI_BASE_URL}/chat/completions`, {
     method: "POST",

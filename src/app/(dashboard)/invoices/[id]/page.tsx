@@ -42,6 +42,7 @@ import {
   whatsappUrl,
 } from "@/lib/whatsapp";
 import { useToast } from "@/components/ui/toast";
+import { DueDateChip } from "@/components/collect/due-date-chip";
 import { useBusinessType } from "@/hooks/use-business-type";
 import { formatPurityLabel } from "@/lib/jewellery";
 
@@ -330,6 +331,7 @@ export default function InvoiceDetailPage() {
             <Mail className="h-3 w-3" /> Emailed {formatDate(invoice.last_emailed_at)}
           </span>
         )}
+        {invoice.status !== "cancelled" && <DueDateChip invoice={invoice} editable={!isReadOnly} />}
         {(invoice.status === "issued" || invoice.status === "partially_paid") && (
           <Link href={`/invoices/${invoice.id}/edit`}>
             <Button size="sm" variant="outline">
@@ -647,7 +649,7 @@ export default function InvoiceDetailPage() {
         <p className="mt-1 text-right text-xs text-slate">{amountInWords(invoice.grand_total, invoice.currency)}</p>
         {taxCtx.country.zatcaQr && company?.tax_id ? (
           <div className="mt-3 flex items-center justify-end gap-3">
-            <p className="text-right text-[11px] text-slate">ZATCA e-invoice QR</p>
+            <p className="text-right text-[11px] text-slate">ZATCA QR code (phase 1)</p>
             <ZatcaQr
               sellerName={company.company_name}
               vatNumber={company.tax_id}

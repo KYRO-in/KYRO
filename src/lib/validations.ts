@@ -1,13 +1,14 @@
 import { z } from "zod";
 import { DEFAULT_INVOICE_PREFIX } from "@/lib/brand";
 import { VAT_CATEGORIES } from "@/lib/vat";
-import { DEFAULT_COUNTRY, isCountryCode, isValidTaxId, getCountryConfig } from "@/lib/vat/countries";
+import { DEFAULT_COUNTRY, isOfferedCountry, isValidTaxId, getCountryConfig } from "@/lib/vat/countries";
 
-/** ISO country we support; anything else falls back to the UAE. */
+/** A new business: one of the six GCC countries (empty = the UAE). */
 const countryField = z
   .string()
   .optional()
-  .transform((v) => (isCountryCode(v) ? v.toUpperCase() : DEFAULT_COUNTRY));
+  .refine((v) => !v || isOfferedCountry(v), "Kayyro is available for businesses in the GCC for now.")
+  .transform((v) => (v ? v.toUpperCase() : DEFAULT_COUNTRY));
 import { BUSINESS_TYPES, type ProductFormFieldId } from "@/lib/business-types";
 
 /** Empty string / blank → null; otherwise non-negative number. */
@@ -86,6 +87,15 @@ export const customerSchema = z.object({
   country: z.string().optional().default(DEFAULT_COUNTRY),
   tax_id: z.string().optional().nullable(),
   customer_type: z.enum(["b2b", "b2c"]),
+  // Kayyro Collect (migration 049); empty terms = the business default
+  payment_terms_days: z
+    .string()
+    .optional()
+    .refine((v) => !v || (/^\d+$/.test(v) && Number(v) <= 365), "Enter 0 to 365 days"),
+  preferred_language: z.enum(["auto", "en", "ar"]).optional(),
+  preferred_channel: z.enum(["both", "email", "whatsapp"]).optional(),
+  collect_paused: z.boolean().optional(),
+  whatsapp_opt_in: z.boolean().optional(),
 }).superRefine((data, ctx) => {
   if (!isValidTaxId(data.tax_id, data.country)) {
     const cfg = getCountryConfig(data.country);

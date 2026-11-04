@@ -714,7 +714,7 @@ export function InvoicePdfDocument({
 
         {qrSrc ? (
           <View style={styles.qrRow}>
-            <Text style={styles.qrLabel}>{t("ZATCA e-invoice QR", "رمز الفاتورة الإلكترونية")}</Text>
+            <Text style={styles.qrLabel}>{t("ZATCA QR code", "رمز QR - هيئة الزكاة والضريبة والجمارك")}</Text>
             {/* eslint-disable-next-line jsx-a11y/alt-text */}
             <Image src={qrSrc} style={styles.qrImage} />
           </View>

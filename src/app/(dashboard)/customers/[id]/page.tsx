@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState, LoadingBlock, PageHeader } from "@/components/ui/page-header";
 import { CustomerFormModal } from "@/components/customers/customer-form-modal";
+import { CustomerCollectPanel } from "@/components/collect/customer-collect-panel";
 import { useBusinessType } from "@/hooks/use-business-type";
 import { useCompanySettings } from "@/hooks/use-company";
 import { useCustomers } from "@/hooks/use-customers";
@@ -143,6 +144,8 @@ export default function CustomerDetailPage() {
           </p>
         </div>
       </div>
+
+      <CustomerCollectPanel customer={customer} invoices={customerInvoices} />
 
       <div className="panel overflow-hidden">
         <div className="border-b border-border/70 px-5 py-4">

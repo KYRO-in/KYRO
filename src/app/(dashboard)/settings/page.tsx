@@ -137,7 +137,7 @@ export default function SettingsPage() {
           <div className="grid gap-4 sm:grid-cols-2">
             <Select
               label="Country"
-              options={countryOptions()}
+              options={countryOptions(data.country)}
               error={errors.country?.message}
               {...register("country", {
                 onChange: (e) => {

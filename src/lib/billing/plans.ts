@@ -11,6 +11,8 @@ export type PlanLimits = {
   maxEmployees: number | null;
   /** Questions to Ask Kayyro per calendar month */
   maxAiQuestions: number;
+  /** Invoices Kayyro Collect chases automatically per month (0 = manual only, null = unlimited) */
+  maxCollectInvoices: number | null;
 };
 
 /** Capability flags used for comparison checklist + future gating. */
@@ -28,58 +30,53 @@ export type PlanCapabilities = {
   attendance: boolean;
   /** Ask Kayyro, the AI assistant */
   aiAssistant: boolean;
+  /** Kayyro Collect sends reminders on a schedule (Starter reminds by hand) */
+  collectAuto: boolean;
+  /** Kayyro Collect risk badges and the 9:00 daily summary */
+  collectInsights: boolean;
 };
 
 /**
- * Two price lists. Businesses in India pay in rupees; everyone else (Gulf, UK,
- * Europe) pays in dirhams. The amount actually charged comes from the Razorpay
- * plan behind each env var - create those plans with the same amounts so the
- * page and the checkout always agree:
- *   AED: RAZORPAY_PLAN_STARTER / _PRO / _BUSINESS
- *   INR: RAZORPAY_PLAN_STARTER_INR / _PRO_INR / _BUSINESS_INR
+ * One price list, in UAE dirhams, for every business. The amount actually
+ * charged comes from the price behind each environment variable - create them
+ * with the same amounts so the page and checkout always agree:
+ *   Stripe:   STRIPE_PRICE_STARTER / _PRO / _BUSINESS, and the same + _ANNUAL
+ *   Razorpay: RAZORPAY_PLAN_STARTER / _PRO / _BUSINESS, and the same + _ANNUAL
+ * Annual = pay 10 months, get 12 (2 months free).
  */
-export type PriceRegion = "global" | "india";
+export const PLAN_CURRENCY = "AED";
+const PLAN_LOCALE = "en-AE";
 
-export const PRICE_REGIONS: Record<PriceRegion, { currency: string; locale: string; label: string }> = {
-  global: { currency: "AED", locale: "en-AE", label: "Gulf, UK & Europe (AED)" },
-  india: { currency: "INR", locale: "en-IN", label: "India (₹)" },
+export const PLAN_PRICES: Record<PaidPlanId, { monthly: number; annual: number }> = {
+  starter: { monthly: 49, annual: 490 },
+  pro: { monthly: 99, annual: 990 },
+  business: { monthly: 199, annual: 1990 },
 };
 
-/** Monthly and yearly list prices per region. Yearly = 10 months (2 free). */
-export const REGION_PRICES: Record<PriceRegion, Record<PaidPlanId, { monthly: number; annual: number }>> = {
-  global: {
-    starter: { monthly: 49, annual: 490 },
-    pro: { monthly: 99, annual: 990 },
-    business: { monthly: 199, annual: 1990 },
-  },
-  india: {
-    starter: { monthly: 499, annual: 4999 },
-    pro: { monthly: 999, annual: 9999 },
-    business: { monthly: 1999, annual: 19999 },
-  },
-};
+/** Shown on the Annual toggle */
+export const ANNUAL_SAVING_LABEL = "Save 2 months";
 
 /**
- * Ask Kayyro questions per month. India's allowance is lower because each answer
- * costs the same in dollars while the rupee price is lower. Mirrors
- * plan_limit('ai_questions' / 'ai_questions_in') in migration 043.
+ * Ask Kayyro questions per month. A business set up in India before Kayyro
+ * became GCC-only keeps India's lower allowance, which the database enforces
+ * (plan_limit('ai_questions' / 'ai_questions_in') in migration 043).
  */
-export const AI_QUESTIONS: Record<PriceRegion, Record<PlanId, number>> = {
+export type AiAllowanceRegion = "global" | "india";
+
+export const AI_QUESTIONS: Record<AiAllowanceRegion, Record<PlanId, number>> = {
   global: { free: 30, starter: 100, pro: 400, business: 1500 },
   india: { free: 20, starter: 50, pro: 200, business: 600 },
 };
 
-export function priceRegionFor(country: string | null | undefined): PriceRegion {
+export function aiAllowanceRegionFor(country: string | null | undefined): AiAllowanceRegion {
   return (country ?? "").toUpperCase() === "IN" ? "india" : "global";
 }
 
 export function aiQuestionsFor(plan: string | null | undefined, country: string | null | undefined): number {
   const id: PlanId = plan === "starter" || plan === "pro" || plan === "business" ? plan : "free";
-  return AI_QUESTIONS[priceRegionFor(country)][id];
+  return AI_QUESTIONS[aiAllowanceRegionFor(country)][id];
 }
 
-/** @deprecated Use PRICE_REGIONS[region].currency */
-export const PLAN_CURRENCY = PRICE_REGIONS.global.currency;
 
 export type PlanDefinition = {
   id: PaidPlanId;
@@ -133,7 +130,7 @@ export const PAID_PLANS: Record<PaidPlanId, PlanDefinition> = {
       "Inventory & VAT tax invoices",
       "Email support",
     ],
-    limits: { maxInvoicesPerMonth: 50, maxActiveProducts: 100, maxEmployees: 5, maxAiQuestions: 100 },
+    limits: { maxInvoicesPerMonth: 50, maxActiveProducts: 100, maxEmployees: 5, maxAiQuestions: 100, maxCollectInvoices: 0 },
     capabilities: {
       inventoryGst: true,
       gstrExport: true,
@@ -145,6 +142,8 @@ export const PAID_PLANS: Record<PaidPlanId, PlanDefinition> = {
       pos: true,
       attendance: true,
       aiAssistant: true,
+      collectAuto: false,
+      collectInsights: false,
     },
     envPlanIdKey: "RAZORPAY_PLAN_STARTER",
   },
@@ -163,7 +162,7 @@ export const PAID_PLANS: Record<PaidPlanId, PlanDefinition> = {
       "Purchases & credit notes",
       "Priority support",
     ],
-    limits: { maxInvoicesPerMonth: 300, maxActiveProducts: null, maxEmployees: 15, maxAiQuestions: 400 },
+    limits: { maxInvoicesPerMonth: 300, maxActiveProducts: null, maxEmployees: 15, maxAiQuestions: 400, maxCollectInvoices: 100 },
     capabilities: {
       inventoryGst: true,
       gstrExport: true,
@@ -175,6 +174,8 @@ export const PAID_PLANS: Record<PaidPlanId, PlanDefinition> = {
       pos: true,
       attendance: true,
       aiAssistant: true,
+      collectAuto: true,
+      collectInsights: false,
     },
     recommended: true,
     envPlanIdKey: "RAZORPAY_PLAN_PRO",
@@ -194,7 +195,7 @@ export const PAID_PLANS: Record<PaidPlanId, PlanDefinition> = {
       "Multi-warehouse ready",
       "Dedicated support",
     ],
-    limits: { maxInvoicesPerMonth: null, maxActiveProducts: null, maxEmployees: null, maxAiQuestions: 1500 },
+    limits: { maxInvoicesPerMonth: null, maxActiveProducts: null, maxEmployees: null, maxAiQuestions: 1500, maxCollectInvoices: null },
     capabilities: {
       inventoryGst: true,
       gstrExport: true,
@@ -206,6 +207,8 @@ export const PAID_PLANS: Record<PaidPlanId, PlanDefinition> = {
       pos: true,
       attendance: true,
       aiAssistant: true,
+      collectAuto: true,
+      collectInsights: true,
     },
     envPlanIdKey: "RAZORPAY_PLAN_BUSINESS",
   },
@@ -218,6 +221,8 @@ export const TRIAL_LIMITS: PlanLimits = {
   maxActiveProducts: 100,
   maxEmployees: 5,
   maxAiQuestions: 30,
+  // Matches plan_limit('collect_invoices') for trials (migration 049)
+  maxCollectInvoices: 100,
 };
 
 export type PlanChecklistItem = {
@@ -233,7 +238,7 @@ export type PlanChecklistItem = {
  * Comparison checklist derived from each plan’s limits + capabilities
  * so the cards stay in sync with what gating actually uses.
  */
-export function getPlanChecklist(planId: PaidPlanId, region: PriceRegion = "global"): PlanChecklistItem[] {
+export function getPlanChecklist(planId: PaidPlanId, region: AiAllowanceRegion = "global"): PlanChecklistItem[] {
   const plan = PAID_PLANS[planId];
   const { limits, capabilities } = plan;
 
@@ -283,13 +288,40 @@ export function getPlanChecklist(planId: PaidPlanId, region: PriceRegion = "glob
       value: AI_QUESTIONS[region][planId].toLocaleString("en-US"),
     },
     {
+      id: "collect",
+      label:
+        limits.maxCollectInvoices === 0
+          ? "Kayyro Collect: one-tap payment reminders"
+          : limits.maxCollectInvoices == null
+            ? "Kayyro Collect: automatic reminders, unlimited invoices"
+            : `Kayyro Collect: automatic reminders, ${limits.maxCollectInvoices} invoices / month`,
+      included: true,
+      rowLabel: "Kayyro Collect invoices chased / month",
+      value:
+        limits.maxCollectInvoices === 0
+          ? "Manual"
+          : limits.maxCollectInvoices == null
+            ? "Unlimited"
+            : String(limits.maxCollectInvoices),
+    },
+    {
+      id: "collect_ai",
+      label: "Kayyro Collect reads customer replies with AI",
+      included: capabilities.collectAuto,
+    },
+    {
+      id: "collect_insights",
+      label: "Kayyro Collect risk badges & 9:00 daily summary",
+      included: capabilities.collectInsights,
+    },
+    {
       id: "inventory_gst",
       label: "Inventory & VAT tax invoices",
       included: capabilities.inventoryGst,
     },
     {
       id: "gstr_export",
-      label: "VAT 201 ready exports",
+      label: "VAT return exports (UAE, Saudi, Bahrain, Oman)",
       included: capabilities.gstrExport,
     },
     {
@@ -320,12 +352,8 @@ export function getPlanChecklist(planId: PaidPlanId, region: PriceRegion = "glob
   ];
 }
 
-export function getPlanPrice(
-  plan: PlanDefinition,
-  interval: BillingInterval,
-  region: PriceRegion = "global"
-): PlanPriceView {
-  const list = REGION_PRICES[region][plan.id];
+export function getPlanPrice(plan: PlanDefinition, interval: BillingInterval): PlanPriceView {
+  const list = PLAN_PRICES[plan.id];
   if (interval === "annual") {
     const price = list.annual;
     // Strike-through yearly price is the honest "12 × monthly"
@@ -339,10 +367,7 @@ export function getPlanPrice(
   }
 
   const price = list.monthly;
-  const compareAt =
-    region === "global" && plan.compareAtMonthly != null && plan.compareAtMonthly > price
-      ? plan.compareAtMonthly
-      : null;
+  const compareAt = plan.compareAtMonthly != null && plan.compareAtMonthly > price ? plan.compareAtMonthly : null;
   return {
     price,
     compareAt,
@@ -359,8 +384,12 @@ export function getPlanLimits(plan: Organization["plan"] | string | null | undef
   return TRIAL_LIMITS;
 }
 
-/** Trial / free use Starter capabilities so pricing and enforcement stay aligned. */
-export const TRIAL_CAPABILITIES: PlanCapabilities = { ...PAID_PLANS.starter.capabilities };
+/**
+ * Trial / free use Starter capabilities so pricing and enforcement stay aligned,
+ * except Kayyro Collect: a trial can try automatic reminders like Pro
+ * (the database gives trials the Pro allowance too, migration 049).
+ */
+export const TRIAL_CAPABILITIES: PlanCapabilities = { ...PAID_PLANS.starter.capabilities, collectAuto: true };
 
 export function getPlanCapabilities(
   plan: Organization["plan"] | string | null | undefined
@@ -388,6 +417,10 @@ export function capabilityUpgradeMessage(capability: keyof PlanCapabilities): st
       return "VAT return exports are not included on your current plan - upgrade at Settings → Billing.";
     case "prioritySupport":
       return "Priority support is available on Pro and Business - upgrade at Settings → Billing.";
+    case "collectAuto":
+      return "Automatic payment reminders are available on Pro and Business - upgrade at Settings → Billing.";
+    case "collectInsights":
+      return "Collect risk badges and the daily summary are available on the Business plan - upgrade at Settings → Billing.";
     case "dedicatedSupport":
       return "Dedicated support is available on the Business plan - upgrade at Settings → Billing.";
     default:
@@ -395,13 +428,13 @@ export function capabilityUpgradeMessage(capability: keyof PlanCapabilities): st
   }
 }
 
-export function razorpayPlanEnvKey(plan: PaidPlanId, region: PriceRegion = "global"): string {
+export function razorpayPlanEnvKey(plan: PaidPlanId, interval: BillingInterval = "monthly"): string {
   const base = PAID_PLANS[plan].envPlanIdKey;
-  return region === "india" ? `${base}_INR` : base;
+  return interval === "annual" ? `${base}_ANNUAL` : base;
 }
 
-export function getRazorpayPlanId(plan: PaidPlanId, region: PriceRegion = "global"): string {
-  const key = razorpayPlanEnvKey(plan, region);
+export function getRazorpayPlanId(plan: PaidPlanId, interval: BillingInterval = "monthly"): string {
+  const key = razorpayPlanEnvKey(plan, interval);
   const value = process.env[key];
   if (!value) {
     throw new Error(`Missing env ${key}. Create the plan in Razorpay and add it to the environment variables.`);
@@ -412,19 +445,47 @@ export function getRazorpayPlanId(plan: PaidPlanId, region: PriceRegion = "globa
 export function mapRazorpayPlanIdToTier(razorpayPlanId: string | undefined | null): PaidPlanId | null {
   if (!razorpayPlanId) return null;
   for (const tier of PAID_PLAN_ORDER) {
-    for (const region of ["global", "india"] as const) {
-      const id = process.env[razorpayPlanEnvKey(tier, region)];
+    for (const interval of ["monthly", "annual"] as const) {
+      const id = process.env[razorpayPlanEnvKey(tier, interval)];
       if (id && razorpayPlanId === id) return tier;
     }
   }
   return null;
 }
 
-export function formatPlanPrice(amount: number, region: PriceRegion = "global"): string {
-  const { currency, locale } = PRICE_REGIONS[region];
-  return new Intl.NumberFormat(locale, {
+/**
+ * Stripe (AED): a recurring monthly and a recurring yearly Price per plan,
+ * created in the Stripe Dashboard with the same amounts as PLAN_PRICES. Their
+ * ids go in STRIPE_PRICE_STARTER / _PRO / _BUSINESS and the same + _ANNUAL.
+ */
+export function stripePriceEnvKey(plan: PaidPlanId, interval: BillingInterval = "monthly"): string {
+  return `STRIPE_PRICE_${plan.toUpperCase()}${interval === "annual" ? "_ANNUAL" : ""}`;
+}
+
+export function getStripePriceId(plan: PaidPlanId, interval: BillingInterval = "monthly"): string {
+  const key = stripePriceEnvKey(plan, interval);
+  const value = process.env[key]?.trim();
+  if (!value) {
+    throw new Error(`Missing env ${key}. Create the monthly Price in Stripe and add its id to the environment variables.`);
+  }
+  return value;
+}
+
+export function mapStripePriceIdToTier(priceId: string | undefined | null): PaidPlanId | null {
+  if (!priceId) return null;
+  for (const tier of PAID_PLAN_ORDER) {
+    for (const interval of ["monthly", "annual"] as const) {
+      const id = process.env[stripePriceEnvKey(tier, interval)]?.trim();
+      if (id && id === priceId) return tier;
+    }
+  }
+  return null;
+}
+
+export function formatPlanPrice(amount: number): string {
+  return new Intl.NumberFormat(PLAN_LOCALE, {
     style: "currency",
-    currency,
+    currency: PLAN_CURRENCY,
     minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
     maximumFractionDigits: 2,
   }).format(amount);

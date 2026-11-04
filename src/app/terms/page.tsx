@@ -84,7 +84,7 @@ export default function TermsOfServicePage() {
           </li>
           <li>
             Subscription fees are billed in advance on a recurring basis (monthly
-            or annual, as selected) via our payment partner, Razorpay.
+            or annual, as selected) via our payment partners, Stripe and Razorpay.
           </li>
           <li>
             Prices are subject to change with prior notice; changes apply from

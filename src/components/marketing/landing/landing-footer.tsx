@@ -10,7 +10,7 @@ const COLUMNS = [
       { href: "/#tour", label: "Tour" },
       { href: "/#industries", label: "Every business" },
       { href: "/countries", label: "Countries & tax" },
-      { href: "/#calculator", label: "VAT & GST calculator" },
+      { href: "/#calculator", label: "VAT calculator" },
       { href: "/pricing", label: "Pricing" },
     ],
   },
@@ -19,7 +19,7 @@ const COLUMNS = [
     links: [
       { href: "/how-it-works", label: "How to use" },
       { href: "/how-it-works#first-invoice", label: "Your first invoice" },
-      { href: "/how-it-works#vat", label: "VAT & GST returns" },
+      { href: "/how-it-works#vat", label: "VAT returns" },
       { href: "/#faq", label: "FAQ" },
     ],
   },
@@ -53,8 +53,8 @@ export function LandingFooter() {
               <span className="font-display text-xl font-extrabold tracking-tight text-white">{APP_NAME}</span>
             </Link>
             <p className="mt-4 max-w-sm text-[15px] leading-relaxed text-white/55">
-              VAT and GST billing, stock and payments for every kind of business - from the corner vegetable stall in
-              Dubai to the furniture showroom in Manchester.
+              VAT billing, stock and payments for every kind of business in the GCC - from the corner vegetable
+              stall in Dubai to the furniture showroom in Riyadh.
             </p>
             <a
               href={`mailto:${LEGAL_SUPPORT_EMAIL}`}
@@ -94,7 +94,7 @@ export function LandingFooter() {
             © {new Date().getFullYear()} {LEGAL_ENTITY_NAME}. All rights reserved.
           </p>
           <p className="flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#34d399]" /> VAT &amp; GST ready · Gulf, UK, Europe &amp; India
+            <span className="h-1.5 w-1.5 rounded-full bg-[#34d399]" /> VAT ready · Built for the GCC
           </p>
         </div>
       </div>

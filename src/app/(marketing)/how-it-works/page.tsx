@@ -8,7 +8,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "How it works",
-  description: `A walkthrough of ${APP_NAME}: set up your business, add what you sell with categories and units, send VAT or GST invoices for your country by email or WhatsApp, collect payments and prepare your tax return.`,
+  description: `A walkthrough of ${APP_NAME}: set up your business, add what you sell with categories and units, send VAT invoices for your Gulf country by email or WhatsApp, collect payments and prepare your tax return.`,
 };
 
 export default function HowItWorksPage() {
@@ -18,7 +18,7 @@ export default function HowItWorksPage() {
         eyebrow="How it works"
         title="From sign-up to"
         accent="your first invoice."
-        body="Everything you need to run billing, stock and VAT or GST - explained in plain words, with the real screens."
+        body="Everything you need to run billing, stock and VAT - explained in plain words, with the real screens."
       >
         <div className="flex flex-wrap items-center justify-center gap-3">
           <Link

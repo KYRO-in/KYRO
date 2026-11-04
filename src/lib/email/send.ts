@@ -18,6 +18,8 @@ export type OutgoingEmail = {
   html: string;
   text: string;
   attachments?: EmailAttachment[];
+  /** Extra headers, e.g. List-Unsubscribe on payment reminders */
+  headers?: Record<string, string>;
 };
 
 export type EmailStatus = {
@@ -67,6 +69,7 @@ export async function sendEmail(email: OutgoingEmail): Promise<{ id: string | nu
       subject: email.subject,
       html: email.html,
       text: email.text,
+      headers: email.headers && Object.keys(email.headers).length ? email.headers : undefined,
       attachments: email.attachments?.map((a) => ({
         filename: a.filename,
         content: a.content.toString("base64"),

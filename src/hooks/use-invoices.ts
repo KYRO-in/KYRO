@@ -14,6 +14,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { ensureTaxSchema, needsTaxSchema } from "@/lib/vat/schema";
 import { resolveTaxContext, taxFieldsFor, type TaxParty } from "@/lib/vat/context";
+import { mapInvoiceRow } from "@/lib/invoice-row";
 import { useOrganization } from "@/hooks/use-company";
 
 type TaxPayload = CreateInvoicePayload["tax"];
@@ -78,28 +79,6 @@ function normalizeRpcInvoice(data: unknown): Invoice {
     round_off: Number(invoice.round_off),
     grand_total: Number(invoice.grand_total),
   };
-}
-
-function mapInvoiceRow(data: Record<string, unknown>): Invoice {
-  return {
-    ...data,
-    subtotal: Number(data.subtotal),
-    total_vat: Number(data.total_vat),
-    currency: String(data.currency ?? "INR"),
-    round_off: Number(data.round_off),
-    grand_total: Number(data.grand_total),
-    amount_paid: Number(data.amount_paid ?? 0),
-    items: ((data.items as Record<string, unknown>[]) ?? []).map((it) => ({
-      ...it,
-      quantity: Number(it.quantity),
-      unit_price: Number(it.unit_price),
-      taxable_value: Number(it.taxable_value),
-      vat_rate: Number(it.vat_rate),
-      vat_amount: Number(it.vat_amount),
-      vat_category: normalizeVatCategory(it.vat_category, Number(it.vat_rate)),
-      line_total: Number(it.line_total),
-    })),
-  } as Invoice;
 }
 
 export function useInvoices() {
@@ -496,31 +475,8 @@ export function useInvoiceMutations() {
               organization_id: orgId,
             },
           });
-          if (rpcError) {
-            // Fallback without RPC
-            const { error: pErr } = await supabase.from("payments").insert({
-              organization_id: orgId,
-              customer_id: invoice.customer_id,
-              invoice_id: invoice.id,
-              amount: remaining,
-              payment_date: new Date().toISOString().slice(0, 10),
-              payment_mode: "cash",
-              notes: "Marked paid",
-              created_by: input.user_id,
-            });
-            if (pErr && !/relation|does not exist|schema cache/i.test(pErr.message)) {
-              throw pErr;
-            }
-            const { error } = await supabase
-              .from("invoices")
-              .update({
-                status: "paid",
-                amount_paid: Number(invoice.grand_total),
-                cancelled_reason: null,
-              })
-              .eq("id", input.id);
-            if (error) throw error;
-          }
+          // Payments are only recorded by the database function (migration 048)
+          if (rpcError) throw rpcError;
           return;
         }
       }
@@ -530,9 +486,6 @@ export function useInvoiceMutations() {
         .update({
           status: input.status,
           cancelled_reason: input.status === "cancelled" ? input.cancelled_reason ?? null : null,
-          ...(input.status === "paid"
-            ? { amount_paid: Number(invoice.grand_total) }
-            : {}),
         })
         .eq("id", input.id);
       if (error) throw error;

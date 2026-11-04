@@ -1,9 +1,9 @@
 /** Display-only brand constants (not DB schema). */
 export const APP_NAME = "Kayyro";
 export const APP_TAGLINE = "Smart billing for every business";
-export const APP_TITLE = "Kayyro - Smart billing for every business";
+export const APP_TITLE = "Kayyro - VAT billing for the GCC";
 export const APP_DESCRIPTION =
-  "VAT and GST invoicing, inventory and customers for businesses in the Gulf, the UK, Europe and India.";
+  "VAT invoicing, inventory and customers for businesses in the UAE, Saudi Arabia, Bahrain, Oman, Qatar and Kuwait.";
 
 /** Default invoice number prefix for new orgs (editable in Settings). */
 export const DEFAULT_INVOICE_PREFIX = "KY";

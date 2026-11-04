@@ -10,7 +10,8 @@ How Kayyro protects business data, and what to configure before going live.
 | Authentication | Supabase Auth. Passwords are hashed by Supabase (bcrypt) and never stored or logged by Kayyro. Sign-up enforces strong passwords (8+ characters with upper and lower case, a number and a symbol) and confirms the email address. Password reset by email link; the reset page never reveals whether an account exists. |
 | Tenant isolation | Row Level Security on every table: a business can only read and write its own rows (`current_org_id()`). |
 | Access control | Admin-only pages (`/settings`, `/users`, `/warehouses`) are checked on the server in middleware as well as in the UI. In the database, staff cannot change roles, promote themselves, move users between businesses, or edit business settings. The accountant role is read-only, enforced by a database trigger on every business table (including inside invoice functions). |
-| Billing | Plan, trial and subscription fields can only be changed by the server (Razorpay webhook with a verified HMAC signature), never from the browser. Plan limits (invoices per month, active products, expired trial) are enforced in the database. |
+| Financial records | The database checks every invoice, purchase and credit note: each line must equal quantity × price with tax matching its rate, the totals must equal the lines, and nothing can be negative (migration 048). Issued invoices, invoice lines and payments can only change through Kayyro’s own database functions; invoices and payments can’t be deleted, saved purchases and credit notes can’t be edited, and sale-linked stock entries can’t be edited. Every change or removal of these records is written to an audit log that admins can read. |
+| Billing | Plan, trial and subscription fields can only be changed by the server (Razorpay webhook with a verified HMAC signature, Stripe webhook with a verified signature), never from the browser. Plan limits (invoices per month, active products, expired trial) are enforced in the database. |
 | API endpoints | Every private endpoint checks the session and the user's business. Errors return a generic message; details are only logged on the server. |
 | Rate limiting | Shared, database-backed limits (migration 039) on sign-up, staff invites, invoice emails, WhatsApp shares, short links and checkout, plus per-IP flood protection in middleware. |
 | CSRF / CORS | State-changing API calls from other websites are rejected (Origin / Sec-Fetch-Site check). No CORS headers are sent, so other sites cannot read API responses. |
@@ -19,14 +20,14 @@ How Kayyro protects business data, and what to configure before going live.
 | Input handling | All forms are validated with zod. Uploaded PDFs must be real PDFs (and at most 6 MB). Exports guard against spreadsheet formula injection. Redirects after login only go to pages on this site. |
 | Files | Invoice PDFs are in a private bucket, opened through short-lived signed links. Signature images can no longer be listed by outsiders. Browser source maps are not published. |
 | Debug | Production builds strip debug logging, and the setup page is hidden once Supabase is configured. |
-| Dependencies | Next.js 15.5 and React 19. `npm audit --omit=dev` reports 0 vulnerabilities. |
+| Dependencies | Next.js 15.5.28 and React 19. `npm audit --omit=dev` reports 0 vulnerabilities (checked 29 Oct 2026). |
 
 ## Go-live checklist
 
 ### Supabase (SQL Editor)
 
 1. Back up the database (Database → Backups).
-2. Run `037_vat_gcc.sql`, then `038_every_business_email.sql`, then `039_security_hardening.sql`, then `041_kayyro_features.sql`. Each is safe to re-run.
+2. Run `037_vat_gcc.sql`, then `038_every_business_email.sql`, then `039_security_hardening.sql`, then `041_kayyro_features.sql`, and every later numbered migration in order (up to `048_protect_financial_records.sql`). Each is safe to re-run.
 
 ### Supabase (Dashboard)
 

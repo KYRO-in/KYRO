@@ -13,7 +13,7 @@ import {
 } from "@/lib/business-types";
 import { isDemoMode } from "@/lib/demo/mode";
 import { createClient } from "@/lib/supabase/client";
-import { countryOptions, getCountryConfig, guessCountryFromTimeZone, isCountryCode } from "@/lib/vat/countries";
+import { countryOptions, getCountryConfig, guessCountryFromTimeZone, isOfferedCountry } from "@/lib/vat/countries";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useRef, useState } from "react";
@@ -59,7 +59,7 @@ export default function CompleteSetupPage() {
         typeof meta.business_type === "string" && BUSINESS_TYPE_OPTIONS.some((o) => o.value === meta.business_type)
           ? (meta.business_type as BusinessType)
           : DEFAULT_BUSINESS_TYPE;
-      const metaCountry = isCountryCode(meta.country) ? String(meta.country).toUpperCase() : guessCountryFromTimeZone();
+      const metaCountry = isOfferedCountry(meta.country) ? String(meta.country).toUpperCase() : guessCountryFromTimeZone();
       if (name) setBusinessName(name);
       if (owner) setOwnerName(owner);
       setBusinessType(type);

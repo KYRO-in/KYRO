@@ -80,7 +80,7 @@ export function Hero() {
             <span className="absolute h-5 w-5 animate-ping rounded-full bg-[#b65cff]/40" />
             <span className="h-2 w-2 rounded-full bg-[#b65cff]" />
           </span>
-          New · VAT &amp; GST for 35 countries
+          Built for the GCC · VAT for all 6 Gulf countries
         </motion.div>
 
         <h1 className="mx-auto mt-7 max-w-5xl font-display text-[46px] font-extrabold leading-[1.02] tracking-[-0.045em] text-white sm:text-7xl lg:text-[96px]">
@@ -95,8 +95,8 @@ export function Hero() {
           transition={{ duration: 0.9, ease: EASE, delay: 0.9 }}
           className="mx-auto mt-7 max-w-2xl text-lg leading-relaxed text-white/65 sm:text-xl"
         >
-          Tax invoices, stock and your VAT or GST return, in one calm, fast workspace for businesses in the
-          UAE, Saudi Arabia and the Gulf, the UK, Europe and India.
+          Tax invoices, stock and your VAT return, in one calm, fast workspace for businesses across the UAE,
+          Saudi Arabia, Bahrain, Oman, Qatar and Kuwait.
         </motion.p>
 
         <motion.div
@@ -128,7 +128,7 @@ export function Hero() {
           </Magnetic>
         </motion.div>
         <Reveal delay={1.2} y={10}>
-          <p className="mt-5 text-[13px] text-white/45">No card required · VAT &amp; GST · Gulf, UK, Europe &amp; India</p>
+          <p className="mt-5 text-[13px] text-white/45">No card required · VAT ready · Built for the GCC</p>
         </Reveal>
       </div>
 
@@ -147,11 +147,11 @@ export function Hero() {
           </FloatChip>
           <FloatChip className="absolute -right-3 top-40 hidden lg:block xl:-right-16" delay={0.25}>
             <Receipt className="h-4 w-4 text-[#b65cff]" />
-            CGST 9% + SGST 9% · ₹1,080.00
+            VAT 15% · SAR 1,150.00
           </FloatChip>
           <FloatChip className="absolute -bottom-5 left-16 hidden md:block" delay={0.5}>
             <CheckCircle2 className="h-4 w-4 text-[#34d399]" />
-            VAT 201 · 9-box · GSTR-3B
+            VAT 201 · Saudi VAT return
           </FloatChip>
         </motion.div>
       </div>

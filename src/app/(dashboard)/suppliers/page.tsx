@@ -10,7 +10,7 @@ import { Modal } from "@/components/ui/modal";
 import { EmptyState, LoadingBlock, PageHeader } from "@/components/ui/page-header";
 import { SearchInput } from "@/components/ui/search-input";
 import { Select } from "@/components/ui/select";
-import { countryOptions, getCountryConfig, isValidTaxId } from "@/lib/vat/countries";
+import { partyCountryOptions, getCountryConfig, isValidTaxId } from "@/lib/vat/countries";
 import { useCompanySettings } from "@/hooks/use-company";
 import { useOrgAccess } from "@/hooks/use-org-access";
 import { useSupplierMutations, useSuppliers } from "@/hooks/use-suppliers";
@@ -225,7 +225,7 @@ export default function SuppliersPage() {
             />
             <Select
               label="Country"
-              options={countryOptions()}
+              options={partyCountryOptions()}
               value={formCountry.code}
               onChange={(e) => setForm((f) => ({ ...f, country: e.target.value, state: "" }))}
             />

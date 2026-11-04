@@ -207,10 +207,13 @@ export function NumberTicker({
   const reduce = useReducedMotion();
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: "-40px" });
-  const mv = useMotionValue(reduce ? value : 0);
+  // The real number is in the page from the start (search engines, no-JS, slow
+  // phones); it only counts up from zero once it scrolls into view.
+  const mv = useMotionValue(value);
 
   useEffect(() => {
     if (!inView || reduce) return;
+    mv.set(0);
     const c = animate(mv, value, { duration: 1.6, ease: EASE });
     return () => c.stop();
   }, [inView, reduce, value, mv]);

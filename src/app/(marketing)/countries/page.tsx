@@ -4,14 +4,14 @@ import { FinalCta } from "@/components/marketing/landing/final-cta";
 import { PageHero } from "@/components/marketing/landing/page-hero";
 import { Reveal } from "@/components/marketing/landing/primitives";
 import { APP_NAME } from "@/lib/brand";
-import { COUNTRY_GROUPS, ENABLED_COUNTRIES } from "@/lib/vat/countries";
-import { ArrowRight, ArrowRightLeft, Coins, FileCheck2, Landmark, QrCode, Plane } from "lucide-react";
+import { ENABLED_COUNTRIES, OFFERED_GROUPS } from "@/lib/vat/countries";
+import { ArrowRight, Coins, FileCheck2, Languages, QrCode, Plane, ToggleRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Countries & tax",
-  description: `${APP_NAME} bills under the VAT and GST rules of ${ENABLED_COUNTRIES.length} countries: the UAE, Saudi Arabia, Bahrain, Oman, Qatar, Kuwait, the United Kingdom, all 27 EU countries and India.`,
+  description: `${APP_NAME} bills under the VAT rules of all ${ENABLED_COUNTRIES.length} GCC countries: the UAE, Saudi Arabia, Bahrain, Oman, Qatar and Kuwait.`,
 };
 
 const FEATURES = [
@@ -21,14 +21,14 @@ const FEATURES = [
     body: "Every Saudi invoice carries the ZATCA QR code. Consumers get a Simplified Tax Invoice, businesses a Tax Invoice.",
   },
   {
-    icon: Landmark,
-    title: "India GST, split right",
-    body: "CGST + SGST for customers in your state, IGST for other states, UTGST for union territories. HSN / SAC on every line.",
+    icon: Languages,
+    title: "English and Arabic",
+    body: "Every invoice can print in English with Arabic labels, in your own currency, for all six countries.",
   },
   {
-    icon: ArrowRightLeft,
-    title: "EU reverse charge",
-    body: "Selling to a VAT-registered business in another EU country? No VAT is charged and the Article 196 wording prints for you.",
+    icon: ToggleRight,
+    title: "Qatar and Kuwait, ready for VAT",
+    body: "No VAT yet, so invoices are titled \"Invoice\" with no tax lines and no VAT return. If VAT is introduced, it can be switched on.",
   },
   {
     icon: Plane,
@@ -43,7 +43,7 @@ const FEATURES = [
   {
     icon: FileCheck2,
     title: "Your country's return",
-    body: "UAE VAT 201, Saudi VAT return, UK 9-box, India GSTR-3B, or an output / input VAT summary - exported to Excel.",
+    body: "UAE VAT 201 by emirate, the Saudi, Bahrain and Oman VAT returns, or a sales summary in Qatar and Kuwait - exported to Excel.",
   },
 ];
 
@@ -54,11 +54,11 @@ const FAQ = [
   },
   {
     q: "I sell to customers in other countries. What happens?",
-    a: "Give each customer their country. Inside the EU, a business customer with a VAT number is reverse charged; everyone else abroad is treated as an export and zero-rated. The suggested treatment is shown on the invoice and you can change it.",
+    a: "Give each customer their country. A customer abroad is treated as a zero-rated export, or as reverse charge for a VAT-registered business when you choose it. The treatment is shown on the invoice and you can change it.",
   },
   {
-    q: "Does Kayyro connect to ZATCA, HMRC or the GST portal?",
-    a: "Not yet. Kayyro prints the ZATCA QR code (phase 1) and prepares your return in the official layout, ready for you or your accountant to file. Direct submission (ZATCA phase 2, HMRC Making Tax Digital, GST e-invoicing) is on the roadmap.",
+    q: "Does Kayyro connect to ZATCA or the FTA?",
+    a: "Not yet. Kayyro prints the ZATCA QR code (phase 1) on Saudi invoices and prepares your return in the official layout, ready for you or your accountant to file. Kayyro is not ZATCA phase 2 (e-invoicing integration) compliant yet.",
   },
   {
     q: "What if a rate changes?",
@@ -70,7 +70,7 @@ export default function CountriesPage() {
   return (
     <main>
       <PageHero
-        eyebrow={`${ENABLED_COUNTRIES.length} countries · VAT & GST`}
+        eyebrow={`${ENABLED_COUNTRIES.length} GCC countries · VAT`}
         title="Your country's tax,"
         accent="built in."
         body="Pick your country once. Every invoice, receipt, credit note and tax return follows its rules, in its currency."
@@ -87,7 +87,7 @@ export default function CountriesPage() {
             href="#all-countries"
             className="inline-flex h-12 items-center rounded-2xl border border-white/15 bg-white/5 px-5 text-[15px] font-semibold text-white backdrop-blur transition-colors hover:bg-white/10"
           >
-            See every country
+            See all six countries
           </Link>
         </div>
       </PageHero>
@@ -127,14 +127,14 @@ export default function CountriesPage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <Reveal>
             <h2 className="font-display text-3xl font-extrabold tracking-[-0.03em] text-white sm:text-5xl">
-              Every country, at a glance
+              All six countries, at a glance
             </h2>
             <p className="mt-3 max-w-2xl text-white/55">
               Standard and reduced rates, currency, tax number and the return {APP_NAME} prepares for you.
             </p>
           </Reveal>
 
-          {COUNTRY_GROUPS.map((group) => {
+          {OFFERED_GROUPS.map((group) => {
             const list = ENABLED_COUNTRIES.filter((c) => c.group === group);
             return (
               <Reveal key={group} className="mt-10">
@@ -149,6 +149,7 @@ export default function CountriesPage() {
                         <th className="px-5 py-3 font-semibold">Tax</th>
                         <th className="px-5 py-3 font-semibold">Other rates</th>
                         <th className="px-5 py-3 font-semibold">Currency</th>
+                        <th className="px-5 py-3 font-semibold">Decimals</th>
                         <th className="px-5 py-3 font-semibold">Tax number</th>
                         <th className="px-5 py-3 font-semibold">Return</th>
                       </tr>
@@ -169,6 +170,7 @@ export default function CountriesPage() {
                             </td>
                             <td className="px-5 py-3 font-mono text-xs">{reduced.length ? reduced.join(" · ") : "-"}</td>
                             <td className="px-5 py-3 font-mono text-xs">{c.currency}</td>
+                            <td className="px-5 py-3 font-mono text-xs">{c.currencyDecimals}</td>
                             <td className="px-5 py-3">{c.taxIdLabel}</td>
                             <td className="px-5 py-3">{c.returnName}</td>
                           </tr>

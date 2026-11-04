@@ -87,7 +87,7 @@ export default function RefundsPolicyPage() {
           </li>
           <li>
             Refunds, where applicable, are processed back to the original payment
-            method via Razorpay and typically take 5–7 business days to reflect,
+            method via Stripe or Razorpay and typically take 5–7 business days to reflect,
             depending on your bank.
           </li>
         </ul>

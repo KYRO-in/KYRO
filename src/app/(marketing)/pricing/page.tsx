@@ -9,7 +9,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Pricing",
-  description: `Simple ${APP_NAME} plans for businesses in the Gulf, the UK, Europe and India. 14-day free trial, no card required, cancel anytime.`,
+  description: `Simple ${APP_NAME} plans in UAE dirhams for businesses across the GCC. 14-day free trial, no card required, cancel anytime.`,
 };
 
 const BILLING_FAQ = [
@@ -27,7 +27,7 @@ const BILLING_FAQ = [
   },
   {
     q: "Is the annual plan cheaper?",
-    a: "Yes - annual billing is ten months' price for twelve months of service, about 17% less than paying monthly.",
+    a: "Yes - you pay for 10 months and get 12, so you save 2 months. Starter is AED 490 a year, Pro AED 990 and Business AED 1,990.",
   },
   {
     q: "How do refunds work?",
@@ -39,10 +39,10 @@ export default function PricingPage() {
   return (
     <main>
       <PageHero
-        eyebrow="Pricing in AED or ₹"
+        eyebrow="Pricing in AED"
         title="Simple pricing."
         accent="Pays for itself."
-        body="Every plan includes tax invoices for your country, VAT / GST return summaries, email & WhatsApp sending and all 16 trades. Start free for 14 days - no card required."
+        body="Every plan includes tax invoices for your Gulf country, VAT return summaries, email & WhatsApp sending and all 16 trades. Start free for 14 days - no card required."
       >
         <TrustRow />
       </PageHero>

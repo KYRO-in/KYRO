@@ -27,6 +27,7 @@ import {
   Sparkles,
   Contact,
   CalendarCheck,
+  HandCoins,
   type LucideIcon,
 } from "lucide-react";
 import Image from "next/image";
@@ -97,6 +98,7 @@ const billingNav: {
   },
   { href: "/customers", label: "Customers", icon: Users, tourId: "tour-customers" },
   { href: "/outstanding", label: "Outstanding", icon: Banknote, tourId: "tour-outstanding" },
+  { href: "/collect", label: "Get Paid", icon: HandCoins, tourId: "tour-collect" },
   {
     href: "/suppliers",
     label: "Suppliers",

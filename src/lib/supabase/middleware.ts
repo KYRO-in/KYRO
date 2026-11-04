@@ -19,7 +19,15 @@ function hasSupabaseEnv() {
 const ADMIN_PATHS = ["/settings", "/users", "/warehouses", "/staff", "/attendance"];
 
 /** Server-to-server callers that legitimately post from another origin. */
-const CROSS_ORIGIN_POST_ALLOWED = ["/api/billing/webhook"];
+const CROSS_ORIGIN_POST_ALLOWED = [
+  "/api/billing/webhook",
+  "/api/billing/stripe/webhook",
+  // Supabase pg_cron (secret-protected) and one-click unsubscribe from mail apps
+  "/api/collect/run",
+  "/api/collect/opt-out",
+  // Customer replies (360dialog, Resend receiving), each verified by its own secret
+  "/api/collect/inbound/",
+];
 
 const MUTATING = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
@@ -95,7 +103,7 @@ export async function updateSession(request: NextRequest) {
     path.startsWith("/refund-policy");
   const isSetupPage = path.startsWith("/setup");
   // Public links: invoice short links, and each employee's private phone check-in page
-  const isShortLink = path.startsWith("/i/") || path.startsWith("/checkin/");
+  const isShortLink = path.startsWith("/i/") || path.startsWith("/checkin/") || path.startsWith("/u/") || path.startsWith("/pay/");
   const isPublicAsset =
     path.startsWith("/_next") ||
     path.startsWith("/marketing") ||

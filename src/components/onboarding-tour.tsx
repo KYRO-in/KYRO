@@ -85,7 +85,7 @@ const ALL_STEPS: TourStep[] = [
   },
   {
     title: "Reports",
-    body: "See sales and tax summaries for any date range. Includes your tax return summary (VAT return or GSTR-3B) for your accountant when it's time to file.",
+    body: "See sales and tax summaries for any date range. Includes your VAT return summary (VAT 201 in the UAE) for your accountant when it's time to file.",
     target: "tour-reports",
     href: "/reports",
   },
@@ -97,7 +97,7 @@ const ALL_STEPS: TourStep[] = [
   },
   {
     title: "Settings",
-    body: "Your company name, address, tax number (TRN, GSTIN or VAT number) and bank details. These appear on tax invoices - keep them up to date.",
+    body: "Your company name, address, tax number (TRN or VAT number) and bank details. These appear on tax invoices - keep them up to date.",
     target: "tour-settings",
     href: "/settings",
     adminOnly: true,

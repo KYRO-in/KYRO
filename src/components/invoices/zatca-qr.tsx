@@ -42,6 +42,6 @@ export function ZatcaQr({
   if (!src) return null;
   return (
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={src} alt="ZATCA e-invoice QR code" width={size} height={size} className="rounded-[6px] bg-white p-1" />
+    <img src={src} alt="ZATCA QR code" width={size} height={size} className="rounded-[6px] bg-white p-1" />
   );
 }

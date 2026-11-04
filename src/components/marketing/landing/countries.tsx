@@ -7,13 +7,7 @@ import {
   resolveTaxContext,
   taxSummaryRows,
 } from "@/lib/vat/context";
-import {
-  COUNTRY_GROUPS,
-  ENABLED_COUNTRIES,
-  getCountryConfig,
-  type CountryGroup,
-  type CountryVatConfig,
-} from "@/lib/vat/countries";
+import { ENABLED_COUNTRIES, getCountryConfig, type CountryVatConfig } from "@/lib/vat/countries";
 import { cn, currencyDecimals } from "@/lib/utils";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Check, Globe2 } from "lucide-react";
@@ -21,49 +15,26 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { EASE, Reveal, WordsReveal } from "./primitives";
 
-const GROUP_LABEL: Record<CountryGroup, string> = {
-  Gulf: "Gulf",
-  "United Kingdom": "UK",
-  Europe: "Europe",
-  India: "India",
-};
-
-/** First country shown for each region tab. */
-const GROUP_DEFAULT: Record<CountryGroup, string> = {
-  Gulf: "AE",
-  "United Kingdom": "GB",
-  Europe: "DE",
-  India: "IN",
-};
-
 /** What makes each country's billing different, in plain words. */
 export function countryHighlights(c: CountryVatConfig): string[] {
   const out: string[] = [];
-  if (c.taxSystem === "none") out.push("No VAT yet: clean invoices with no tax lines");
-  if (c.taxSystem === "gst") {
-    out.push("CGST + SGST inside your state, IGST between states");
-    out.push("UTGST for union territories, HSN / SAC codes on every line");
-    out.push("Amounts in words in lakh and crore");
-    out.push("Invoice numbers restart every April");
+  if (c.taxSystem === "none") {
+    out.push("No VAT yet: clean invoices titled \"Invoice\", with no tax lines");
+    out.push("Ready to switch VAT on if it is introduced");
   }
   if (c.zatcaQr) {
     out.push("ZATCA QR code on every invoice");
     out.push("Simplified Tax Invoice for consumers, Tax Invoice for businesses");
   }
   if (c.currencyDecimals === 3) out.push(`${c.currency} kept to 3 decimals, payments included`);
-  if (c.vatZone === "EU") {
-    out.push("Reverse charge for business customers in other EU countries");
-    out.push("Zero-rated exports outside the EU, with the legal wording");
-  }
-  if (c.code === "GB") out.push("Reduced 5% and zero rates, exports zero-rated");
   if (c.code === "AE") out.push("VAT 201 split across all seven emirates");
   if (c.arabic) out.push("English + Arabic invoices");
-  if (c.taxSystem === "vat" && !c.vatZone && c.code !== "GB") out.push("Exports to other countries zero-rated");
+  if (c.taxSystem === "vat") out.push("Exports to other countries zero-rated");
   return out.slice(0, 5);
 }
 
 /** A typical region for each sample invoice (the first in the list can be unusual, e.g. a union territory). */
-const SAMPLE_REGION: Record<string, string> = { AE: "Dubai", IN: "Maharashtra", SA: "Riyadh", GB: "England" };
+const SAMPLE_REGION: Record<string, string> = { AE: "Dubai", SA: "Riyadh" };
 
 function formatAmount(n: number, currency: string) {
   const d = currencyDecimals(currency);
@@ -166,57 +137,19 @@ function SampleInvoice({ country }: { country: CountryVatConfig }) {
   );
 }
 
-/** Region tabs → country chips → what changes + a live sample invoice. */
+/** Country chips → what changes + a live sample invoice. */
 export function CountryExplorer({ compact = false }: { compact?: boolean }) {
   const reduce = useReducedMotion();
-  const [group, setGroup] = useState<CountryGroup>("Gulf");
   const [code, setCode] = useState("AE");
   const country = getCountryConfig(code);
-  const inGroup = ENABLED_COUNTRIES.filter((c) => c.group === group);
 
   const otherRates = country.rates.filter((r) => r.rate !== country.standardRate && r.rate > 0);
 
   return (
     <div className={cn("mx-auto grid max-w-5xl gap-6", compact ? "lg:grid-cols-[1.1fr_1fr]" : "lg:grid-cols-[1.15fr_1fr]")}>
       <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur sm:p-7">
-        <div role="tablist" aria-label="Region" className="flex flex-wrap gap-2">
-          {COUNTRY_GROUPS.map((g) => {
-            const on = g === group;
-            return (
-              <button
-                key={g}
-                role="tab"
-                type="button"
-                aria-selected={on}
-                onClick={() => {
-                  setGroup(g);
-                  setCode(GROUP_DEFAULT[g]);
-                }}
-                className={cn(
-                  "relative rounded-full px-4 py-2 text-sm font-semibold transition-colors",
-                  on ? "text-white" : "text-white/55 hover:text-white"
-                )}
-              >
-                {on && (
-                  <motion.span
-                    layoutId={compact ? "country-group-compact" : "country-group"}
-                    className="absolute inset-0 rounded-full bg-[#b65cff]/25 ring-1 ring-[#b65cff]/60"
-                    transition={{ type: "spring", stiffness: 380, damping: 32 }}
-                  />
-                )}
-                <span className="relative">
-                  {GROUP_LABEL[g]}
-                  <span className="ml-1.5 text-xs text-white/40">
-                    {ENABLED_COUNTRIES.filter((c) => c.group === g).length}
-                  </span>
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="mt-5 flex max-h-[168px] flex-wrap gap-1.5 overflow-y-auto pr-1">
-          {inGroup.map((c) => {
+        <div className="flex flex-wrap gap-1.5" role="group" aria-label="Country">
+          {ENABLED_COUNTRIES.map((c) => {
             const on = c.code === code;
             return (
               <button
@@ -290,11 +223,8 @@ export function CountryExplorer({ compact = false }: { compact?: boolean }) {
         <SampleInvoice country={country} />
         {country.taxSystem !== "none" ? (
           <p className="px-2 text-center text-xs leading-relaxed text-white/40">
-            Selling abroad?{" "}
-            {country.vatZone
-              ? "EU business customers are reverse charged automatically."
-              : "Exports are zero-rated automatically."}{" "}
-            The right wording prints on the invoice.
+            Selling abroad? Exports are zero-rated automatically, and the right wording prints on the
+            invoice.
           </p>
         ) : null}
       </div>
@@ -302,7 +232,7 @@ export function CountryExplorer({ compact = false }: { compact?: boolean }) {
   );
 }
 
-/** Home-page section: "One app, 35 countries". */
+/** Home-page section: the six GCC countries. */
 export function Countries() {
   return (
     <section id="countries" className="relative scroll-mt-20 py-24 sm:py-32">
@@ -311,7 +241,7 @@ export function Countries() {
         <div className="mx-auto max-w-3xl text-center">
           <Reveal>
             <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#c98bff]">
-              <Globe2 className="h-4 w-4" /> {ENABLED_COUNTRIES.length} countries
+              <Globe2 className="h-4 w-4" /> {ENABLED_COUNTRIES.length} Gulf countries
             </p>
           </Reveal>
           <h2 className="mt-3 font-display text-4xl font-extrabold tracking-[-0.035em] text-white sm:text-6xl">
@@ -321,8 +251,8 @@ export function Countries() {
           </h2>
           <Reveal delay={0.1}>
             <p className="mx-auto mt-5 max-w-2xl text-lg text-white/60">
-              VAT in the Gulf, the UK and all 27 EU countries, GST in India. Pick your country once and every
-              invoice, receipt and tax return follows its rules, in its currency.
+              VAT in the UAE, Saudi Arabia, Bahrain and Oman, and clean invoices in Qatar and Kuwait. Pick
+              your country once and every invoice, receipt and tax return follows its rules, in its currency.
             </p>
           </Reveal>
         </div>
@@ -337,7 +267,7 @@ export function Countries() {
               href="/countries"
               className="inline-flex items-center gap-2 text-sm font-semibold text-[#d9aaff] hover:text-white"
             >
-              See every country, rate and return →
+              See all six countries, rates and returns →
             </Link>
           </p>
         </Reveal>

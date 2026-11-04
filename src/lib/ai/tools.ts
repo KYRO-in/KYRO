@@ -142,6 +142,26 @@ export const AI_TOOLS: AiTool[] = [
       additionalProperties: false,
     },
   },
+  {
+    name: "late_payer_risk",
+    description:
+      "Kayyro Collect late-payer risk per customer (high, medium, low) with the reasons: average days late on paid invoices, broken promises to pay, and what is overdue now. Use for 'who will probably pay late', 'risky customers', 'who should I chase'.",
+    input_schema: {
+      type: "object",
+      properties: { limit: { type: "integer", description: "How many customers to return, 1-25" } },
+      additionalProperties: false,
+    },
+  },
+  {
+    name: "expected_collections",
+    description:
+      "Money expected in the coming days: unpaid invoices whose promised payment date (or due date) falls in the period, with the total. Disputed invoices are left out. Use for 'how much will I collect this week', 'expected payments', 'cash coming in'.",
+    input_schema: {
+      type: "object",
+      properties: { days: { type: "integer", description: "How many days ahead, starting today, 1-90 (7 = this week)" } },
+      additionalProperties: false,
+    },
+  },
 ];
 
 const isDate = (v: unknown): v is string => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v);
@@ -576,6 +596,50 @@ const handlers: Record<string, Handler> = {
     const { summariseAttendance } = await import("@/lib/attendance");
     const summary = summariseAttendance(employees ?? [], punches, { from, to, timeZone: ctx.timeZone });
     return { from, to, time_zone: ctx.timeZone, employees: summary };
+  },
+
+  async late_payer_risk(sb, input) {
+    const limit = clampInt(input.limit, 10, 25);
+    const { data, error } = await sb.rpc("collect_customer_risk");
+    if (error) throw new Error(/collect_customer_risk|does not exist|schema cache/i.test(error.message) ? "Late-payer risk needs the latest database update (migration 051)." : error.message);
+    const order = { high: 0, medium: 1, low: 2 } as const;
+    const rows = ((data ?? []) as Record<string, unknown>[])
+      .map((r) => ({
+        customer: String(r.customer_name ?? ""),
+        risk: String(r.level ?? "low") as keyof typeof order,
+        owes_now: money(Number(r.open_balance ?? 0)),
+        overdue_now: money(Number(r.overdue_amount ?? 0)),
+        oldest_overdue_days: Number(r.oldest_overdue_days ?? 0),
+        average_days_late: r.avg_days_late == null ? null : Number(r.avg_days_late),
+        paid_invoices_last_12_months: Number(r.paid_invoices ?? 0),
+        broken_promises_last_6_months: Number(r.broken_promises ?? 0),
+      }))
+      .sort((a, b) => order[a.risk] - order[b.risk] || b.overdue_now - a.overdue_now);
+    return {
+      rules:
+        "Risk comes from average days late on paid invoices (over 7 / over 30 days), broken promises (1 / 2 or more), and overdue now (oldest over 14 / over 60 days, or at least half of what they owe).",
+      customers: rows.slice(0, limit),
+      counts: { high: rows.filter((r) => r.risk === "high").length, medium: rows.filter((r) => r.risk === "medium").length },
+    };
+  },
+
+  async expected_collections(sb, input) {
+    const days = clampInt(input.days, 7, 90);
+    const { data, error } = await sb.rpc("collect_expected", { p_org: null, p_days: days });
+    if (error) throw new Error(/collect_expected|does not exist|schema cache/i.test(error.message) ? "Expected payments need the latest database update (migration 051)." : error.message);
+    const rows = ((data ?? []) as Record<string, unknown>[]).map((r) => ({
+      invoice: String(r.invoice_number ?? ""),
+      customer: String(r.customer_name ?? ""),
+      expected_on: String(r.expected_on ?? ""),
+      amount: money(Number(r.balance ?? 0)),
+      promised_by_customer: r.promised === true,
+    }));
+    return {
+      days,
+      total: money(rows.reduce((s, r) => s + r.amount, 0)),
+      invoices: rows.slice(0, 50),
+      note: "Expected = what is still owed on invoices due (or promised) in the period. It is not a guarantee.",
+    };
   },
 };
 

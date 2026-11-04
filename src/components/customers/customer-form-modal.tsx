@@ -9,10 +9,11 @@ import { useBusinessType } from "@/hooks/use-business-type";
 import { useCustomerMutations } from "@/hooks/use-customers";
 import { useToast } from "@/components/ui/toast";
 import { useCompanySettings } from "@/hooks/use-company";
-import { DEFAULT_COUNTRY, countryOptions, getCountryConfig } from "@/lib/vat/countries";
+import { DEFAULT_COUNTRY, partyCountryOptions, getCountryConfig } from "@/lib/vat/countries";
 import type { Customer } from "@/lib/types";
 import { customerSchema } from "@/lib/validations";
 import { zodFormResolver } from "@/lib/form-resolver";
+import { formatDate } from "@/lib/utils";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -56,6 +57,11 @@ export function CustomerFormModal({
       country: DEFAULT_COUNTRY,
       tax_id: "",
       customer_type: "b2c",
+      payment_terms_days: "",
+      preferred_language: "auto",
+      preferred_channel: "both",
+      collect_paused: false,
+      whatsapp_opt_in: false,
     },
   });
 
@@ -71,6 +77,11 @@ export function CustomerFormModal({
         country: customer.country || orgCountry,
         tax_id: customer.tax_id ?? "",
         customer_type: hideCustomerType ? "b2c" : customer.customer_type,
+        payment_terms_days: customer.payment_terms_days == null ? "" : String(customer.payment_terms_days),
+        preferred_language: customer.preferred_language ?? "auto",
+        preferred_channel: customer.preferred_channel ?? "both",
+        collect_paused: !!customer.collect_paused,
+        whatsapp_opt_in: !!customer.whatsapp_opt_in_at,
       });
     } else {
       reset({
@@ -82,6 +93,11 @@ export function CustomerFormModal({
         country: orgCountry,
         tax_id: "",
         customer_type: "b2c",
+        payment_terms_days: "",
+        preferred_language: "auto",
+        preferred_channel: "both",
+        collect_paused: false,
+        whatsapp_opt_in: false,
       });
     }
   }, [customer, open, reset, hideCustomerType, orgCountry]);
@@ -91,9 +107,30 @@ export function CustomerFormModal({
   const foreign = country.code !== sellerCountry.code;
 
   const onSubmit = async (values: FormValues) => {
+    const { payment_terms_days, preferred_language, preferred_channel, collect_paused, whatsapp_opt_in, ...base } = values;
+    const terms = payment_terms_days ? Number(payment_terms_days) : null;
+    // Payment reminder settings (Kayyro Collect). Left out while they are all defaults on a new
+    // customer, so adding customers keeps working on a database without migration 049.
+    const collect =
+      customer?.preferred_channel !== undefined ||
+      terms !== null ||
+      preferred_language !== "auto" ||
+      preferred_channel !== "both" ||
+      collect_paused ||
+      whatsapp_opt_in
+        ? {
+            payment_terms_days: terms,
+            preferred_language: preferred_language ?? "auto",
+            preferred_channel: preferred_channel ?? "both",
+            collect_paused: !!collect_paused,
+            // Keep the original opt-in date; record today when it is first ticked
+            whatsapp_opt_in_at: whatsapp_opt_in ? (customer?.whatsapp_opt_in_at ?? new Date().toISOString()) : null,
+          }
+        : {};
     const result = await upsert.mutateAsync({
       ...(customer?.id ? { id: customer.id } : {}),
-      ...values,
+      ...base,
+      ...collect,
       customer_type: hideCustomerType ? "b2c" : values.customer_type,
       email: values.email || null,
       phone: values.phone || null,
@@ -132,7 +169,7 @@ export function CustomerFormModal({
         )}
         <Select
           label="Country"
-          options={countryOptions()}
+          options={partyCountryOptions()}
           {...register("country", {
             onChange: (e) => {
               const next = getCountryConfig(e.target.value);
@@ -179,6 +216,60 @@ export function CustomerFormModal({
           className="sm:col-span-2"
           {...register("billing_address")}
         />
+
+        <fieldset className="sm:col-span-2 grid gap-4 rounded-[10px] border border-border p-4 sm:grid-cols-3">
+          <legend className="px-1 text-xs font-semibold uppercase tracking-[0.08em] text-slate">Payment reminders</legend>
+          <Input
+            label="Payment terms (days)"
+            type="number"
+            min={0}
+            max={365}
+            placeholder="Business default"
+            error={errors.payment_terms_days?.message}
+            {...register("payment_terms_days")}
+          />
+          <Select
+            label="Language"
+            options={[
+              { value: "auto", label: "Business default" },
+              { value: "en", label: "English" },
+              { value: "ar", label: "العربية" },
+            ]}
+            {...register("preferred_language")}
+          />
+          <Select
+            label="Remind by"
+            options={[
+              { value: "both", label: "WhatsApp and email" },
+              { value: "whatsapp", label: "WhatsApp only" },
+              { value: "email", label: "Email only" },
+            ]}
+            {...register("preferred_channel")}
+          />
+          <label className="flex items-start gap-2 text-sm text-ink sm:col-span-3">
+            <input type="checkbox" className="mt-0.5 h-4 w-4 accent-[#7c1cf0]" {...register("whatsapp_opt_in")} />
+            <span>
+              The customer agreed to get WhatsApp reminders
+              {customer?.whatsapp_opt_in_at && watch("whatsapp_opt_in") ? (
+                <span className="block text-xs text-slate">Since {formatDate(customer.whatsapp_opt_in_at)}</span>
+              ) : (
+                <span className="block text-xs text-slate">Needed before Kayyro sends WhatsApp reminders by itself</span>
+              )}
+            </span>
+          </label>
+          <label className="flex items-start gap-2 text-sm text-ink sm:col-span-3">
+            <input type="checkbox" className="mt-0.5 h-4 w-4 accent-[#7c1cf0]" {...register("collect_paused")} />
+            <span>
+              Pause reminders for this customer
+              <span className="block text-xs text-slate">For VIPs and special arrangements. You can still remind them yourself.</span>
+            </span>
+          </label>
+          {customer?.collect_opted_out_at && (
+            <p className="text-xs text-rose sm:col-span-3">
+              This customer stopped payment reminders on {formatDate(customer.collect_opted_out_at)}. Only they can turn them back on.
+            </p>
+          )}
+        </fieldset>
 
         {upsert.isError && (
           <p className="sm:col-span-2 text-xs text-danger">{(upsert.error as Error).message}</p>

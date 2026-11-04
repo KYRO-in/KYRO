@@ -4,12 +4,12 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getRazorpay } from "@/lib/billing/razorpay";
 import {
   getRazorpayPlanId,
+  type BillingInterval,
   type PaidPlanId,
   PAID_PLANS,
-  PRICE_REGIONS,
-  priceRegionFor,
+  PLAN_CURRENCY,
+  PLAN_PRICES,
   razorpayPlanEnvKey,
-  REGION_PRICES,
 } from "@/lib/billing/plans";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -18,6 +18,7 @@ import { serverError } from "@/lib/security/request";
 
 const bodySchema = z.object({
   plan: z.enum(["starter", "pro", "business"]),
+  interval: z.enum(["monthly", "annual"]).default("monthly"),
 });
 
 export async function POST(request: Request) {
@@ -50,6 +51,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
     }
     const plan = parsed.data.plan as PaidPlanId;
+    const interval = parsed.data.interval as BillingInterval;
 
     const admin = createAdminClient();
     const limited = await rateLimit(admin, `billing:org:${profile.organization_id}`, 10, 3600);
@@ -64,14 +66,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Organization not found" }, { status: 400 });
     }
 
-    // Indian businesses pay the rupee plan; everyone else the dirham plan
-    const region = priceRegionFor(org.country as string | null);
-    if (!process.env[razorpayPlanEnvKey(plan, region)]) {
-      console.error(`[billing/create-subscription] ${razorpayPlanEnvKey(plan, region)} is not set`);
-      return NextResponse.json({ error: "Payments are not set up yet. Please contact support." }, { status: 500 });
+    // Every business pays the same AED plan, monthly or yearly
+    if (!process.env[razorpayPlanEnvKey(plan, interval)]) {
+      console.error(`[billing/create-subscription] ${razorpayPlanEnvKey(plan, interval)} is not set`);
+      return NextResponse.json(
+        {
+          error:
+            interval === "annual"
+              ? "Yearly billing is not available yet. Choose monthly, or contact support."
+              : "Payments are not set up yet. Please contact support.",
+        },
+        { status: 500 }
+      );
     }
     const razorpay = getRazorpay();
-    const razorpayPlanId = getRazorpayPlanId(plan, region);
+    const razorpayPlanId = getRazorpayPlanId(plan, interval);
 
     let customerId = org.razorpay_customer_id as string | null;
     if (!customerId) {
@@ -91,16 +100,17 @@ export async function POST(request: Request) {
         .eq("id", org.id);
     }
 
-    // 12-month renewable cycle; cancel_at_cycle_end handled separately
+    // Renews for up to 12 months (monthly) or 5 years (yearly); cancel_at_cycle_end handled separately
     const subscription = await razorpay.subscriptions.create({
       plan_id: razorpayPlanId,
       customer_id: customerId,
       customer_notify: 1,
-      total_count: 12,
+      total_count: interval === "annual" ? 5 : 12,
       quantity: 1,
       notes: {
         organization_id: org.id,
         plan,
+        interval,
       },
     });
 
@@ -123,8 +133,8 @@ export async function POST(request: Request) {
       keyId,
       plan,
       planName: PAID_PLANS[plan].name,
-      amount: REGION_PRICES[region][plan].monthly,
-      currency: PRICE_REGIONS[region].currency,
+      amount: PLAN_PRICES[plan][interval],
+      currency: PLAN_CURRENCY,
       prefill: {
         name: org.brand_name || org.name,
         email: org.email || user.email,

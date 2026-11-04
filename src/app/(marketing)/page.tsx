@@ -7,6 +7,7 @@ import { Hero } from "@/components/marketing/landing/hero";
 import { Industries } from "@/components/marketing/landing/industries";
 import { Reveal } from "@/components/marketing/landing/primitives";
 import { ScrollShowcase } from "@/components/marketing/landing/scroll-showcase";
+import { GetPaid } from "@/components/marketing/landing/get-paid";
 import { BusinessMarquee, StatsStrip } from "@/components/marketing/landing/strip";
 import { VatCalculator } from "@/components/marketing/landing/vat-calculator";
 import { APP_DESCRIPTION, APP_NAME, APP_TITLE } from "@/lib/brand";
@@ -45,16 +46,20 @@ const FAQ_ITEMS = [
     a: "Yes - one at a time from the invoice page, many at once from the invoice list, or payment reminders to everyone who owes you. Each email carries the PDF tax invoice and a secure download link, and replies come straight to your business email.",
   },
   {
+    q: "Will Kayyro message my customers without asking me?",
+    a: "Not unless you want it to. By default you approve every message. You can switch to automatic sending any time.",
+  },
+  {
     q: "Which countries' tax rules does it follow?",
-    a: "The UAE, Saudi Arabia (with the ZATCA QR code), Bahrain, Oman, Qatar and Kuwait, the United Kingdom, all 27 EU countries and India (CGST, SGST and IGST). Each invoice carries your tax number, the customer's where they have one, tax per line and a summary by rate, in your currency. Reverse charge and exports are handled too. Always confirm the requirements for your own business with your accountant.",
+    a: "The six GCC countries: the UAE (VAT 5%), Saudi Arabia (VAT 15%, with the ZATCA QR code), Bahrain (VAT 10%), Oman (VAT 5%), and Qatar and Kuwait, which have no VAT yet, so their invoices carry no tax lines. Each invoice carries your tax number, the customer's where they have one, tax per line and a summary by rate, in your own currency, in English and Arabic. Exports and reverse charge are handled too. Always confirm the requirements for your own business with your accountant.",
   },
   {
     q: "Do you file my VAT return for me?",
-    a: `No. ${APP_NAME} prepares a return summary laid out like yours (UAE VAT 201, Saudi VAT return, UK 9-box, India GSTR-3B and more) plus an Excel workbook from your invoices and purchases. You or your accountant still file it.`,
+    a: `No. ${APP_NAME} prepares a return summary laid out like yours (UAE VAT 201, or the Saudi, Bahrain and Oman VAT returns) plus an Excel workbook from your invoices and purchases. You or your accountant still file it.`,
   },
   {
     q: "I sell to customers in other countries. Is that covered?",
-    a: "Yes. Give the customer their country and Kayyro suggests the right treatment: reverse charge for VAT-registered businesses in another EU country, zero-rated export for everyone else abroad. The legal wording prints on the invoice, and you can change it on any bill.",
+    a: "Yes. Give the customer their country and Kayyro treats a sale abroad as a zero-rated export, or as reverse charge for a VAT-registered business customer when you choose it. The wording prints on the invoice, and you can change it on any bill.",
   },
   {
     q: "Is my data safe?",
@@ -73,6 +78,7 @@ export default function MarketingHomePage() {
       <StatsStrip />
       <BusinessMarquee />
       <ScrollShowcase />
+      <GetPaid />
       <Industries />
       <Countries />
       <VatCalculator />

@@ -1,6 +1,17 @@
 import { calcInvoiceTotals, calcLineVat } from "@/lib/vat";
 import { amountInWords } from "@/lib/amount-in-words";
-import { COUNTRIES, ENABLED_COUNTRIES, getCountryConfig, indiaStateFromGstin, indiaStateName, isValidTaxId } from "@/lib/vat/countries";
+import {
+  COUNTRIES,
+  countryOptions,
+  ENABLED_COUNTRIES,
+  GCC_VAT_SWITCH,
+  getCountryConfig,
+  indiaStateFromGstin,
+  indiaStateName,
+  isOfferedCountry,
+  isValidTaxId,
+  partyCountryOptions,
+} from "@/lib/vat/countries";
 import { productTaxLabel, taxChoiceKey, taxChoices } from "@/lib/vat/tax-choices";
 import {
   calcOptionsFor,
@@ -21,7 +32,40 @@ function assert(cond: boolean, msg: string) {
 }
 
 // ---------- the table itself ----------
-assert(ENABLED_COUNTRIES.length === 35, `35 countries (got ${ENABLED_COUNTRIES.length})`);
+// GCC-only for now: exactly the six Gulf countries are offered to new businesses
+assert(
+  ENABLED_COUNTRIES.map((c) => c.code).join(",") === "AE,SA,BH,OM,QA,KW",
+  `offered: the six GCC countries (got ${ENABLED_COUNTRIES.map((c) => c.code).join(",")})`
+);
+assert(Object.keys(COUNTRIES).length === 35, "the other 29 stay configured for existing businesses");
+for (const code of ["GB", "IN", "DE", "FR"]) assert(!isOfferedCountry(code), `${code} is not offered to new businesses`);
+for (const code of ["AE", "sa", "BH", "OM", "QA", "KW"]) assert(isOfferedCountry(code), `${code} is offered`);
+assert(countryOptions().length === 6, "sign-up and settings list six countries");
+assert(countryOptions("IN").some((o) => o.value === "IN"), "an existing India business still sees its own country in Settings");
+assert(!countryOptions("AE").some((o) => o.value === "IN"), "a Gulf business never sees India");
+assert(partyCountryOptions().length === 35 && partyCountryOptions()[0].value === "AE", "customers and suppliers can be anywhere, GCC first");
+assert(Object.keys(GCC_VAT_SWITCH).length === 0, "Qatar and Kuwait have no VAT switched on");
+
+// The rules for each GCC country
+const gcc = (code: string) => getCountryConfig(code);
+const rule = (code: string, taxSystem: string, rate: number, currency: string, decimals: number, title: string, ret: string) => {
+  const c = gcc(code);
+  assert(c.taxSystem === taxSystem, `${code} tax system ${c.taxSystem}`);
+  assert(c.standardRate === rate, `${code} rate ${c.standardRate}`);
+  assert(c.currency === currency && c.currencyDecimals === decimals, `${code} ${c.currency} ${c.currencyDecimals} decimals`);
+  assert(c.invoiceTitle === title, `${code} invoice title "${c.invoiceTitle}"`);
+  assert(c.returnName === ret, `${code} return "${c.returnName}"`);
+  assert(c.arabic === true, `${code} offers English + Arabic`);
+};
+rule("AE", "vat", 5, "AED", 2, "Tax Invoice", "VAT 201");
+rule("SA", "vat", 15, "SAR", 2, "Tax Invoice", "VAT return");
+rule("BH", "vat", 10, "BHD", 3, "Tax Invoice", "VAT return");
+rule("OM", "vat", 5, "OMR", 3, "Tax Invoice", "VAT return");
+rule("QA", "none", 0, "QAR", 2, "Invoice", "Sales summary");
+rule("KW", "none", 0, "KWD", 3, "Invoice", "Sales summary");
+assert(isValidTaxId("100123456700003", "AE") && !isValidTaxId("10012345670000", "AE"), "UAE TRN is 15 digits");
+assert(isValidTaxId("300000000000003", "SA") && !isValidTaxId("30000000000000", "SA"), "Saudi VAT number is 15 digits");
+assert(gcc("SA").zatcaQr === true, "Saudi invoices carry the ZATCA QR code");
 for (const c of Object.values(COUNTRIES)) {
   assert(c.rates[0].rate === c.standardRate, `${c.code}: standard rate listed first`);
   assert(c.taxIdPattern.test(c.taxIdPlaceholder.replace(/\s/g, "")), `${c.code}: placeholder ${c.taxIdPlaceholder} is a valid ${c.taxIdLabel}`);
